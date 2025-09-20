@@ -40,3 +40,16 @@
 .read-the-docs {
   color: #888;
 }
+
+
+@import "tailwindcss";
+
+
+@keyframes toast-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
