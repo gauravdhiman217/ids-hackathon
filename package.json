@@ -1,0 +1,47 @@
+{
+  "name": "turbo-stark-react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:prod": "vite --mode production",
+    "dev:staging": "vite --mode staging",
+    "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && vite build --mode production",
+    "build:staging": "tsc -b && vite build --mode staging",
+    "lint": "eslint src/**/*.{ts,tsx,js,jsx} --fix",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "antd": "^5.22.3",
+    "clsx": "^2.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.39",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "globals": "^13.23.0",
+    "typescript": "5.1.6",
+    "vite": "^5.2.11",
+    "vite-plugin-checker": "^0.10.3",
+    "vite-plugin-eslint": "^1.8.1"
+  }
+}

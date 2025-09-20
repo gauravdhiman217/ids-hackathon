@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+dist/
+build/
+
+# configs
+vite.config.*
+tsconfig*.json
+.eslintrc.*
+eslint.config.*
+yarn.lock
+package-lock.json
+
+# public assets
+public/
