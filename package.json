@@ -11,7 +11,9 @@
     "build:prod": "tsc -b && vite build --mode production",
     "build:staging": "tsc -b && vite build --mode staging",
     "lint": "eslint src/**/*.{ts,tsx,js,jsx} --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
+
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.2",
@@ -19,8 +21,10 @@
     "antd": "^5.22.3",
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
+    "motion": "^12.23.16",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.22.3",
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
@@ -30,6 +34,7 @@
     "@types/node": "^18.19.39",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.0",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -44,8 +49,15 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "globals": "^13.23.0",
     "typescript": "5.1.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "vite": "^5.2.11",
     "vite-plugin-checker": "^0.10.3",
     "vite-plugin-eslint": "^1.8.1"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "npm run lint"
+    ]
   }
 }

@@ -23,6 +23,8 @@
     "@typescript-eslint"
   ],
   "rules": {
+    "consistent-return": "off",
+    "react/require-default-props": "off",
     "global-require": 0,
     "import/no-unresolved": 0,
     "react/jsx-uses-react": "off",

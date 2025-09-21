@@ -13,6 +13,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
    checker({
+      overlay:false,
       eslint: {
         lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
       },

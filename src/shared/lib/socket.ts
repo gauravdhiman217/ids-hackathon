@@ -25,7 +25,7 @@ export function initSocket(token: string): Socket {
       auth: { token }, // Token-based authentication
       reconnection: true, // Enable auto-reconnect
       reconnectionAttempts: 5, // Retry max 5 times
-      reconnectionDelay: 2000, // Wait 2s between retries
+      reconnectionDelay: 2000 // Wait 2s between retries
     });
 
     socket.on("connect_error", (err: any) => {
@@ -47,7 +47,7 @@ export function initSocket(token: string): Socket {
  * socket.emit("send-message", { text: "Hello" });
  */
 export function getSocket(): Socket {
-  if (!socket) throw new Error("Socket not initialized");
+  if (!socket) { throw new Error("Socket not initialized"); }
   return socket;
 }
 
@@ -61,7 +61,7 @@ export function getSocket(): Socket {
 export function closeSocket() {
   if (socket) {
     socket.removeAllListeners(); // Prevent memory leaks
-    socket.disconnect();         // Close the connection
+    socket.disconnect(); // Close the connection
     socket = null;
   }
 }
