@@ -118,6 +118,7 @@ export function NavItems({ items, className, onItemClick }: NavItemsProps) {
         className
       )}
     >
+
       {items.map((item, idx) => (
         <a
           onMouseEnter={() => setHovered(idx)}
