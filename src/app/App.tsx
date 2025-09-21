@@ -3,9 +3,18 @@ import { appConfig } from "@/shared/config"
 import "../global.css"
 import { ToastContainer } from "react-toastify"
 import { Notification } from "@/shared/components/notifications"
+// import { GitHubService } from "@/services"
 
 function App() {
   const [count, setCount] = useState(0)
+
+  // useEffect(() => {
+  //   (async function () {
+  //     const res = await GitHubService.GetUserProfile("prince")
+  //     console.log(res)
+  //   }())
+  // }, [])
+
   return (
     <>
       <ToastContainer />

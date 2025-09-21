@@ -11,3 +11,6 @@ export const getLocalStorage = (key: string): string | null => localStorage.getI
 export const deleteLocalStorage = (key: string): void => {
   localStorage.removeItem(prefixKey(key));
 };
+export const clearStorage = ():void => {
+  localStorage.clear()
+}

@@ -12,5 +12,6 @@
 export const appConfig = {
   NODE_ENV: import.meta.env.MODE,
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
-  APP_NAME: import.meta.env.VITE_APP_NAME
+  APP_NAME: import.meta.env.VITE_APP_NAME,
+  SOCKET_BASE_URL: import.meta.env.VITE_SOCKET_BASE_URL
 };
