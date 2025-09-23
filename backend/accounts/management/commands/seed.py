@@ -23,6 +23,7 @@ class Command(BaseCommand):
                 is_active=True,
             )
             usr.set_password(admin_password)
+            usr.save()
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Admin account {admin_username} created successfully."

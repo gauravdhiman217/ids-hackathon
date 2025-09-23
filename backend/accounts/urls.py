@@ -6,7 +6,8 @@ from .views import (
     RoleView,
     CustomTokenRefreshView,
     ForgotPasswordRequestOtpView,
-    ForgotPasswordVerifyOtpView
+    ForgotPasswordVerifyOtpView,
+    VerifyOtpView,
 )
 
 from django.urls import path, include
@@ -32,6 +33,15 @@ urlpatterns = [
     path("check/", TestingResponse.as_view(), name="testing"),
     path("verify/", TokenVerifyView.as_view(), name="verify"),
     path("role/", RoleView.as_view(), name="RoleView"),
-    path('forgot-password/request-otp/', ForgotPasswordRequestOtpView.as_view(), name='forgot_password_request_otp'),
-    path('forgot-password/verify-otp/', ForgotPasswordVerifyOtpView.as_view(), name='forgot_password_verify_otp'),
+    path("verify-otp/", VerifyOtpView.as_view(), name="verify-otp"),
+    path(
+        "forgot-password/request-otp/",
+        ForgotPasswordRequestOtpView.as_view(),
+        name="forgot_password_request_otp",
+    ),
+    path(
+        "forgot-password/verify-otp/",
+        ForgotPasswordVerifyOtpView.as_view(),
+        name="forgot_password_verify_otp",
+    ),
 ]

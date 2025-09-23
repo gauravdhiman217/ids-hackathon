@@ -54,7 +54,9 @@ class User(AbstractUser):
     role = models.ForeignKey(
         Roles, on_delete=models.DO_NOTHING, null=True, blank=True, default=2
     )
-    is_active = models.BooleanField(default=True)
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_expires_at = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

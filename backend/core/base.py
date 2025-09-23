@@ -2,6 +2,12 @@ from rest_framework.views import exception_handler
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework import pagination
+from datetime import datetime
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
+from django.conf import settings
+import os
 
 
 import logging
@@ -49,6 +55,55 @@ class BasePagination(pagination.PageNumberPagination):
                 "data": data,
             }
         )
+
+
+class EmailSender:
+    def __init__(self, user):
+        self.user = user
+        self.email = user.email
+        self.from_email = settings.DEFAULT_FROM_EMAIL
+
+    def build_html_content(self, template, otp=None):
+        context = {
+            "user": self.user,
+            "otp": otp,
+            "now_year": datetime.now().year,
+            "from_email": self.from_email,
+        }
+        return render_to_string(template, context)
+
+    def send_email(
+        self,
+        otp,
+        subject="Your OTP for BluCygnus Signup",
+        template="accounts/signup_email.html",
+    ):
+        try:
+            html_content = self.build_html_content(template=template, otp=otp)
+            text_content = f"Hello {self.user.first_name}, your OTP for BluCygnus signup is {otp}. It is valid for 30 minutes."
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=self.from_email,
+                to=[self.user.email],
+            )
+            email.attach_alternative(html_content, "text/html")
+
+            logo_path = os.path.join(settings.BASE_DIR, "static", "logo.png")
+            with open(logo_path, "rb") as logo_file:
+                logo = MIMEImage(logo_file.read(), _subtype="png")
+                logo.add_header("Content-ID", "<company_logo>")
+                email.attach(logo)
+
+            email.send()
+            logger.info(f"Signup OTP email sent to {self.user.email}")
+            return True
+        except Exception as e:
+            logger.exception(
+                f"Error sending signup OTP email to {self.user.email}: {str(e)}"
+            )
+            return False
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):

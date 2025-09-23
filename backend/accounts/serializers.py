@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-
+from random import randint as rand
 from .models import User, Roles
 from .constants import GENDER
+from core.base import EmailSender
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -50,6 +52,11 @@ class UserSerializer(ModelSerializer):
         instance = self.Meta.model(**validated_data)
         if password is not None:
             instance.set_password(password)
+        otp = rand(100000, 999999)
+        instance.otp = otp
+        instance.otp_expires_at = datetime.now() + timedelta(minutes=30)
+        email_sender = EmailSender(instance)
+        email_sender.send_email(otp=otp)
         instance.save()
         return instance
 
@@ -73,3 +80,5 @@ class UserSerializer(ModelSerializer):
             )
 
         return value
+
+

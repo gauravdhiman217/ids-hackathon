@@ -206,3 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 backend/static/
+.envs/local/.django
+.envs/prod/.django
+.envs/prod/.postgres

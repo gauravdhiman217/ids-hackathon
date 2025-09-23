@@ -1,3 +1,4 @@
+from core.base import EmailSender
 from .models import User, Roles
 from .serializers import UserSerializer, RoleSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -15,8 +16,6 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import AccessToken
 from random import randint
 from datetime import datetime, timedelta
-from django.conf import settings
-from django.core.mail import send_mail
 
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -150,7 +149,12 @@ class SignupApiView1(APIView):
 
 class LoginApiView(APIView):
     """
-    Login Api
+    This LoginApiView class handles user login.
+
+    Only Admin users can log in. The API validates credentials,
+    checks account status, and returns tokens upon successful login.
+    Methods:
+        post(request): Handles admin login.
     """
 
     permission_classes = (permissions.AllowAny,)
@@ -174,17 +178,28 @@ class LoginApiView(APIView):
                 {
                     "message": "Invalid Login Credentials.",
                     "status": status.HTTP_400_BAD_REQUEST,
-                }
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # if not user.role or user.role.name != "Admin":
+        #     return Response({"message": "Only Admin users can log in."}, status=status.HTTP_403_FORBIDDEN)
+
         if not user.is_active:
+            user.otp = str(randint(100000, 999999))
+            user.otp_expires_at = datetime.now() + timedelta(minutes=30)
+
+            user.save()
+            email_sender = EmailSender(user)
+            email_sender.send_email(otp=user.otp)
             return Response(
                 {
-                    "message": "Your account has been deactivated. Please contact admin to activate your account.",
+                    "message": "Your email is not verified. Please verify your email Otp resend again to registered email.",
                     "status": status.HTTP_400_BAD_REQUEST,
+                    "is_verified": False,
                 }
             )
-        user.last_login = timezone.now()
-        user.save(update_fields=["last_login"])
+
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
@@ -196,9 +211,10 @@ class LoginApiView(APIView):
                 "refresh_token": refresh_token,
             }
         )
+
         return Response(
             {
-                "status": "success",
+                "status": True,
                 "status_code": status.HTTP_200_OK,
                 "message": "Logged In Successfully",
                 "data": data,
@@ -231,7 +247,7 @@ class LogOutView(APIView):
                     "status_code": status.HTTP_202_ACCEPTED,
                     "message": "Logged out Successfully",
                 },
-                status=status.HTTP_202_ACCEPTED
+                status=status.HTTP_202_ACCEPTED,
             )
         except Exception as e:
             return Response(
@@ -275,20 +291,24 @@ class ForgotPasswordRequestOtpView(APIView):
             )
 
         # Generate OTP
-        user.otp = str(randint(1000, 9999))
+        user.otp = str(randint(100000, 999999))
         user.otp_expires_at = datetime.now() + timedelta(minutes=30)
         user.save()
 
-        # Send OTP via email
-        send_mail(
-            "Password Reset OTP",
-            f"Dear {user.first_name}, your OTP for password reset is {user.otp}. It is valid for 30 minutes.",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
+        email_sender = EmailSender(user)
+        email_sender.send_email(
+            otp=user.otp,
+            subject="Password Reset OTP",
+            template="accounts/reset_pwd_email.html",
         )
 
         return Response(
-            {"message": "OTP has been sent to your email."}, status=status.HTTP_200_OK
+            {
+                "status": True,
+                "status_code": status.HTTP_200_OK,
+                "message": "OTP has been sent to your email.",
+            },
+            status=status.HTTP_200_OK,
         )
 
 
@@ -302,20 +322,33 @@ class ForgotPasswordVerifyOtpView(APIView):
 
         if not email or not otp:
             return Response(
-                {"message": "Email and OTP are required."},
+                {
+                    "status": False,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Email and OTP are required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = User.objects.filter(email=email).first()
         if not user:
             return Response(
-                {"message": "User with this email does not exist."},
+                {
+                    "status": False,
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "User with this email does not exist."
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
         if user.otp != otp:
             return Response(
-                {"message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST
-            )
+                {
+                    "status": False,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Invalid OTP."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )   
         if user.otp_expires_at < timezone.now():
             return Response(
                 {"message": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST
@@ -326,11 +359,88 @@ class ForgotPasswordVerifyOtpView(APIView):
             user.otp_expires_at = None
             user.save()
             return Response(
-                {"message": "Password has been reset successfully."},
+                {
+                    "status": True,
+                    "status_code": status.HTTP_200_OK,
+                    "message": "Password has been reset successfully."},
                 status=status.HTTP_200_OK,
             )
 
+
+class VerifyOtpView(APIView):
+    """
+    This VerifyOtpView class handles OTP verification.
+
+    Users can verify their OTP for login or registration. The API validates the
+    provided email and OTP, checks for expiry, and activates the user account
+    upon successful verification.
+
+    Methods:
+        post(request): Handles OTP verification.
+    """
+
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        user_email = request.data.get("email")
+        otp_sent = request.data.get("otp")
+
+        if not user_email or not otp_sent:
+            return Response(
+                {
+                    "status": False,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Please provide both email and OTP.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email=user_email).first()
+        if not user:
+            return Response(
+                {
+                    "status": False,
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "Invalid User email provided! Please provide a correct email.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if user.otp != otp_sent:
+            return Response(
+                {
+                    "status": False,
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "Invalid OTP provided!",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Check if OTP is expired
+        if timezone.now() > user.otp_expires_at:
+            user.otp = None
+            user.otp_expires_at = None
+            user.save()
+            return Response(
+                {
+                    "status": False,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "OTP has expired. Please Regenerate Again!",
+                    "is_verified": False,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.is_active = True
+        user.save()
+
+        serializer = UserSerializer(user)
         return Response(
-            {"message": "OTP verified successfully. Please provide a new password."},
+            {
+                "status": True,
+                "status_code": status.HTTP_200_OK,
+                "message": "User verified successfully.",
+                "data": serializer.data,
+            },
             status=status.HTTP_200_OK,
         )
