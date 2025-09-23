@@ -281,10 +281,10 @@ function CircleAnimation() {
         cancelAnimationFrame(requestIdRef.current);
       }
 
-      const context = canvas.getContext("2d");
-      if (context) {
-        context.reset();
-      }
+      // const context = canvas.getContext("2d");
+      // if (context) {
+      //   context.
+      // }
 
       initArr();
       draw();

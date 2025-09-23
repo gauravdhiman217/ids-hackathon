@@ -55,7 +55,7 @@ export function Navbar({ children, className }: NavbarProps) {
   const [visible, setVisible] = useState<boolean>(false);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 50) {
+    if (latest > 100) {
       setVisible(true);
     } else {
       setVisible(false);
@@ -90,8 +90,8 @@ export function NavBody({ children, className, visible }: NavBodyProps) {
       }}
       transition={{
         type: "spring",
-        stiffness: 150,
-        damping: 25
+        stiffness: 200,
+        damping: 50
       }}
       style={{
         minWidth: "1000px"

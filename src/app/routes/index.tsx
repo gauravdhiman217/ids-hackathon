@@ -1,10 +1,12 @@
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { LandingPage } from "@/pages";
 import { NotFound } from "@shared/components/ui";
 import { routesMap } from "./routeControl";
-import { GuestLayout } from "../layout/GuestLayout";
+
+const GuestLayout = lazy(() => import("../layout/GuestLayout")
+  .then(m => ({ default: m.GuestLayout })));
 
 const Loader = (
   <div className="flex justify-center items-center h-screen w-full">
