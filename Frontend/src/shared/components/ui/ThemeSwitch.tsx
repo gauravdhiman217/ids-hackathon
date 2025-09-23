@@ -43,7 +43,7 @@ function ThemeSwitcher() {
   );
 
   return (
-    <div className="grid grid-cols-3 w-[180px] overflow-hidden border border-zinc-300 dark:border-zinc-700 rounded-sm">
+    <div className="grid grid-cols-3 w-[180px] overflow-x-hidden border border-zinc-300 dark:border-zinc-700 rounded-sm">
       <button type="button" onClick={() => applyTheme("system")} className={getButtonClass("system")} title="System theme">
         <DesktopOutlined />
         <span className="sr-only">System</span>

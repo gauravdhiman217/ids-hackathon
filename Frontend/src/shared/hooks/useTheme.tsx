@@ -6,6 +6,7 @@ export function useTheme(): string | undefined {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const isDark = document.documentElement.classList.contains("dark")
+      console.log(isDark)
       setTheme(isDark ? "dark" : "light")
     })
 

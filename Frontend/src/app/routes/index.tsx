@@ -46,11 +46,11 @@ const routes = () => [
   {
     element: (
       <Suspense fallback={Loader}>
-        <div>Protected Layout</div>
+        <div className="bg-white w-full min-h-[100vh] text-black dark:text-white dark:bg-black">Protected Layout</div>
       </Suspense>
     ),
     children: [
-      { path: routesMap.DASHBOARD.path, element: <div>Dashboard Page</div> },
+      { path: routesMap.DASHBOARD.path, element: <div className="bg-white dark:bg-black w-full min-h-100vh">Dashboard Page</div> },
       { path: routesMap.EMAIL.path, element: <div>Email Page</div> }
     ]
   },
