@@ -13,3 +13,4 @@ package-lock.json
 
 # public assets
 public/
+tailwind.config.*

@@ -1,4 +1,4 @@
-export * from "./Navbar"
+export * from "./navBar"
 export * from "./ThemeSwitch"
 export * from "./lineVerticle"
-export * from "./notfound"
+export * from "./notFound"

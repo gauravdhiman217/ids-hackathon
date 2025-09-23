@@ -1,5 +1,5 @@
 {
-  "name": "turbo-stark-react",
+  "name": "hackathon-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "antd": "^5.22.3",
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.18",
     "motion": "^12.23.16",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
