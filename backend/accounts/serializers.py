@@ -16,7 +16,7 @@ class UserSerializer(ModelSerializer):
     #     queryset=Roles.objects.all(), source="role", write_only=True, required=False
     # )
     role = serializers.StringRelatedField(read_only=True)
-    gender = serializers.ChoiceField(choices=GENDER)
+    gender = serializers.ChoiceField(choices=GENDER, required=False, allow_blank=True)
 
     class Meta:
         model = User

@@ -47,7 +47,9 @@ class User(AbstractUser):
     mobile_code = models.CharField(max_length=30, blank=True, null=True)
     mobile_no = models.CharField(max_length=30, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
-    gender = models.CharField(max_length=1, choices=GENDER, null=True, blank=True)
+    gender = models.CharField(
+        max_length=1, choices=GENDER, null=True, blank=True, default="N"
+    )
     profile_pic = models.FileField(upload_to="profile_pic/", blank=True, null=True)
     role = models.ForeignKey(
         Roles, on_delete=models.DO_NOTHING, null=True, blank=True, default=2

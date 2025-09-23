@@ -228,10 +228,10 @@ class LogOutView(APIView):
             return Response(
                 {
                     "status": "success",
-                    "status_code": status.HTTP_205_RESET_CONTENT,
+                    "status_code": status.HTTP_202_ACCEPTED,
                     "message": "Logged out Successfully",
                 },
-                status=status.HTTP_205_RESET_CONTENT,
+                status=status.HTTP_202_ACCEPTED
             )
         except Exception as e:
             return Response(

@@ -38,13 +38,13 @@ WORKDIR /home/user/app/backend
 # Copy backend code and scripts
 COPY backend/ /home/user/app/backend
 
+RUN mkdir -p /home/user/app/backend/logs && chmod -R ugo+w /home/user/app/backend/logs
+
 # Ensure scripts are executable
 RUN chmod +x scripts/django-entrypoint.sh 
-RUN chmod +x scripts/wait-script.sh
+
 # Switch to non-root user
 USER user
 
 # Set ENTRYPOINT to the initialization script
 ENTRYPOINT ["sh", "scripts/django-entrypoint.sh"]
-# Set default command
-CMD gunicorn core.wsgi --log-file - -b 0.0.0.0:8000 --reload --workers 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50

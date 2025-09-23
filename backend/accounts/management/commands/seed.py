@@ -11,13 +11,16 @@ class Command(BaseCommand):
         admin_email = os.getenv("DJANGO_ADMIN_EMAIL")
         admin_password = os.getenv("DJANGO_ADMIN_PASSWORD")
 
-        admin_role = Roles.objects.get(name="admin")
+        admin_role = Roles.objects.get(name="Admin")
 
         if not User.objects.filter(username=admin_username).exists():
             usr = User.objects.create(
                 username=admin_username,
                 email=admin_email,
                 role=admin_role,
+                is_staff=True,
+                is_superuser=True,
+                is_active=True,
             )
             usr.set_password(admin_password)
             self.stdout.write(
