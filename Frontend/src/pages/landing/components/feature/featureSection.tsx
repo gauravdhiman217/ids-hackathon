@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { OpenAI, Dashboard, Team } from "@/assets/icons";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { AnimatedWrapper } from "@shared/components/wrappers";
 import { Card, CardContent, CardHeader } from "./featureCard";
 
 function CardDecorator({ children }: { children: ReactNode }) {
@@ -14,11 +15,8 @@ function CardDecorator({ children }: { children: ReactNode }) {
 
 export function Features() {
   const theme = useTheme()
-  console.log("hook value", theme)
-  const iconColor = theme === "dark" ? "#ffffff" : "#000000"
-  console.log(iconColor)
   return (
-    <section id="#feature" className="py-16 md:py-32 transition-colors duration-300">
+    <section key={theme} className="py-16 md:py-32 transition-colors duration-300">
       <div className="@container max-w-6xl m-auto ">
         {/* Section Title */}
         <div className="text-center">
@@ -30,77 +28,81 @@ export function Features() {
           </p>
         </div>
         {/* Feature Grid */}
-        <div className="@min-4xl:max-w-full @min-4xl:grid-cols-3 mt-8 grid max-w-lg gap-10 *:text-center md:mt-16">
-          {/* Card 1 */}
-          <Card
-            className="group transition-colors duration-300
+        <AnimatedWrapper preset="slide">
+          <div className="@min-4xl:max-w-full @min-4xl:grid-cols-3 mt-8 grid max-w-lg gap-10 *:text-center md:mt-16">
+            {/* Card 1 */}
+            <Card
+              className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800
             bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md"
-          >
-            <CardHeader className="pb-3">
-              <CardDecorator>
-                <OpenAI iconColor={iconColor} />
-              </CardDecorator>
-              <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
-                AI-Powered Auto Replies
-              </h3>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Automatically classify and
-                respond to repetitive customer emails, freeing up time for critical tasks.
-              </p>
-            </CardContent>
-          </Card>
+            >
+              <CardHeader className="pb-3">
+                <CardDecorator>
+                  <span className="text-black dark:text-white">
+                    <OpenAI />
+                  </span>
+                </CardDecorator>
+                <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
+                  AI-Powered Auto Replies
+                </h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Automatically classify and
+                  respond to repetitive customer emails, freeing up time for critical tasks.
+                </p>
+              </CardContent>
+            </Card>
 
-          {/* Card 2 */}
-          <Card
-            className="group transition-colors duration-300
+            {/* Card 2 */}
+            <Card
+              className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800
             bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md"
-          >
-            <CardHeader className="pb-3">
-              <CardDecorator>
-                <span>
-                  <Dashboard iconColor={iconColor} />
-                </span>
-              </CardDecorator>
-              <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
-                Smart Dashboard & Analytics
-              </h3>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Track incoming emails, auto-responses,
-                and flagged queries with clear real-time insights.
-              </p>
-            </CardContent>
-          </Card>
+            >
+              <CardHeader className="pb-3">
+                <CardDecorator>
+                  <span className="text-black dark:text-white">
+                    <Dashboard />
+                  </span>
+                </CardDecorator>
+                <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
+                  Smart Dashboard & Analytics
+                </h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Track incoming emails, auto-responses,
+                  and flagged queries with clear real-time insights.
+                </p>
+              </CardContent>
+            </Card>
 
-          {/* Card 3 */}
-          <Card
-            className="group transition-colors duration-300
+            {/* Card 3 */}
+            <Card
+              className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800
             bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md"
-          >
-            <CardHeader className="pb-3">
-              <CardDecorator>
-                <span>
-                  <Team iconColor={iconColor} />
-                </span>
-              </CardDecorator>
-              <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
-                L1 Team Oversight
-              </h3>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Every auto-reply is visible to your L1 team for review,
-                ensuring accuracy and giving humans control when needed.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            >
+              <CardHeader className="pb-3">
+                <CardDecorator>
+                  <span className="text-black dark:text-white">
+                    <Team />
+                  </span>
+                </CardDecorator>
+                <h3 className="mt-6 font-medium text-zinc-950 dark:text-zinc-100">
+                  L1 Team Oversight
+                </h3>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Every auto-reply is visible to your L1 team for review,
+                  ensuring accuracy and giving humans control when needed.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </AnimatedWrapper>
 
       </div>
     </section>
