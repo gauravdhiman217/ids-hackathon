@@ -28,7 +28,7 @@ export function Features() {
           </p>
         </div>
         {/* Feature Grid */}
-        <AnimatedWrapper preset="slide">
+        <AnimatedWrapper className="flex justify-center items-center" preset="slide">
           <div className="@min-4xl:max-w-full @min-4xl:grid-cols-3 mt-8 grid max-w-lg gap-10 *:text-center md:mt-16">
             {/* Card 1 */}
             <Card
