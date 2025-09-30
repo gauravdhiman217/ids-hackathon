@@ -38,7 +38,7 @@ WORKDIR /home/user/app/backend
 # Copy backend code and scripts
 COPY backend/ /home/user/app/backend
 
-RUN mkdir -p /home/user/app/backend/logs && chmod -R ugo+w /home/user/app/backend/logs
+RUN mkdir -p /home/user/app/backend/logs && chmod -R ugo+w /home/user/app/backend/logs && touch /home/user/app/backend/logs/django.log
 
 # Ensure scripts are executable
 RUN chmod +x scripts/django-entrypoint.sh 
