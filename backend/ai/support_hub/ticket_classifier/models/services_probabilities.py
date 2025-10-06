@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class CategoriesProbabilities(BaseModel):
+class ServicesProbabilities(BaseModel):
 
     CSG_PDG_17: float = Field(
         ...,

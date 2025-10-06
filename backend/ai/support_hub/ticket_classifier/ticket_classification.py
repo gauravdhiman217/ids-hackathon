@@ -21,13 +21,18 @@ def run_ticket_classification(ticket: str):
     # Parse output into Pydantic model
     opt = base_parser.invoke(input=output)
 
-    # Print top category and priority
-    # print("Top Category:", opt.categories_probabilities.top_category())
-    # print("Priority:", opt.priority)
-    top_category = opt.categories_probabilities.top_category()
-    service = top_category[0].split("_")
+    predicted_type = opt.type_probabilities.top_category()
+    predicted_type = predicted_type[0].split("_")
+    print(predicted_type)
+    type_name = " ".join(predicted_type[:-2])
+
+    predicted_service = opt.services_probabilities.top_category()
+    service = predicted_service[0].split("_")
     service_name = " ".join(service[:-2])
     return {
-        "ticket_class": {"service_name": service_name, "service_id": service[-1]},
+        "ticket_class": {
+            "service": {"service_name": service_name, "service_id": service[-1]},
+            "type": {"type_name": type_name, "type_id": predicted_type[-1]},
+        },
         "priority": opt.priority,
     }
