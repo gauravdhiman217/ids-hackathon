@@ -2,6 +2,7 @@ from celery import shared_task
 from .utils import DatabaseSync, ProcessTicket
 from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState
 from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
+from ai.support_hub.ticket_classifier.ticket_classification import run_ticket_classification
 
 
 
@@ -13,8 +14,16 @@ def process_ticket_data(ticket_id):
     ticket = ticket_processor.fetch_ticket(ticket_id)
     if ticket:
         ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
+        process_ticket_ai(ticket_id)
     return {"ticket_id": ticket_id, "status": "processed"}
 
+def process_ticket_ai(ticket_id):
+    print(f"Processing ticket data with AI for ticket ID: {ticket_id}")
+    ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
+    if ticket:
+        classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
+
+        print(f"AI Classification Result: {classification}")
 
 @shared_task
 def sync_database():
