@@ -5,9 +5,10 @@ from rest_framework import viewsets, generics
 
 from .models import Agent
 from .serializers import AgentSerializer, AgentSkillSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
-from .models import Agent, Type, Service, TicketPriority
+from .models import Agent, Type, Service, TicketPriority, TicketLog
 from core.base import BaseModelViewSet,BaseRetrieveListView
-
+from django.db.models import Count
+from datetime import datetime
 
 
 class WebhookView(APIView):
@@ -58,3 +59,55 @@ class AgentSkillView(BaseRetrieveListView):
     queryset = Agent.objects.filter(is_valid=True, role__isnull=False).distinct("role")
     serializer_class = AgentSkillSerializer
     pagination_class = None
+
+
+class DashboardView(APIView):
+    def get(self, request, *args, **kwargs):
+        today = datetime.now().date()
+
+        total_users = Agent.objects.filter(is_valid=True).count()
+        total_tickets = TicketLog.objects.values('ticket_id').distinct().count()
+
+        tasks_today = TicketLog.objects.filter(
+            created_at__date=today
+        ).values('ticket_id').distinct().count()
+
+        top_services = (
+            TicketLog.objects.filter(service__isnull=False)
+            .values('service__service_name')
+            .annotate(ticket_count=Count('ticket_id', distinct=True))
+            .order_by('-ticket_count')[:5]
+        )
+        top_5_services = [
+            {"service_name": s["service__service_name"], "ticket_count": s["ticket_count"]}
+            for s in top_services
+        ]
+        top_agents = (
+            TicketLog.objects.filter(assigned_agent__isnull=False)
+            .values('assigned_agent__first_name', 'assigned_agent__last_name')
+            .annotate(ticket_count=Count('ticket_id', distinct=True))
+            .order_by('-ticket_count')[:5]
+        )
+
+
+        top_5_agents = [
+            {
+                "agent_name": f"{a['assigned_agent__first_name']} {a['assigned_agent__last_name']}",
+                "ticket_count": a["ticket_count"],
+            }
+            for a in top_agents
+        ]
+
+
+        dashboard_data = {
+            "total_users": total_users,
+            "total_tickets": total_tickets,
+            "tasks_today": tasks_today,
+            "top_5_services": top_5_services,
+            "top_5_agents": top_5_agents,
+        }
+        return Response({
+            "status": True,
+            "status_code": 200,
+            "data": dashboard_data,
+        })
