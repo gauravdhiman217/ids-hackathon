@@ -71,7 +71,7 @@ def sync_database():
                         "is_valid": True if service[7] == 1 else False,
                     }
                 )
-        elif command.description == "get_states":
+        elif command.description == "get_state":
             for state in data:
                 state, _ = TicketState.objects.update_or_create(
                     state_id = state[0],

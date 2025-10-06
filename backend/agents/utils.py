@@ -76,8 +76,6 @@ class ProcessTicket:
             self.url,
             self.userName,
             self.password,
-            session_lifetime=600,
-            verify_ssl=False,
         )
         self.client.session_restore_or_create()
 
@@ -111,14 +109,14 @@ class ProcessTicket:
         if not ticket:
             TicketLog.objects.create(
                 ticket_id=ticket_id,
-                title=ticket_object.field_get('Title', ''),
-                body= ticket_object.articles[0].field_get('Body', '') if ticket_object.articles else '',
+                title=ticket_object.field_get('Title'),
+                body= ticket_object.articles[0].field_get('Body') if ticket_object.articles else '',
                 type = Type.objects.filter(type_id=ticket_object.field_get('TypeID')).first(),
-                service = Service.objects.filter(service_id=ticket_object.field_get('ServiceID')).first(),
-                priority = TicketPriority.objects.filter(priority_id=ticket_object.field_get('PriorityID')).first(),
-                assigned_agent = Agent.objects.filter(agent_id=ticket_object.field_get('OwnerID')).first(),
+                service = Service.objects.filter(service_id=ticket_object.field_get('ServiceID')).first() if ticket_object.field_get('ServiceID') else None,
+                priority = TicketPriority.objects.filter(priority_id=ticket_object.field_get('PriorityID')).first() if ticket_object.field_get('PriorityID') else None,
+                assigned_agent = Agent.objects.filter(agent_id=ticket_object.field_get('OwnerID')).first() if ticket_object.field_get('OwnerID') else None,
                 entry_type = entry_type,
-                ticket_state = TicketState.objects.filter(state_id=ticket_object.field_get('StateID')).first()
+                ticket_state = TicketState.objects.filter(state_id=ticket_object.field_get('StateID')).first() if ticket_object.field_get('StateID') else None,
             )
             return True
         return False
