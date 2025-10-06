@@ -24,7 +24,10 @@ def run_ticket_classification(ticket: str):
     # Print top category and priority
     # print("Top Category:", opt.categories_probabilities.top_category())
     # print("Priority:", opt.priority)
+    top_category = opt.categories_probabilities.top_category()
+    service = top_category[0].split("_")
+    service_name = " ".join(service[:-2])
     return {
-        "ticket_class": opt.categories_probabilities.top_category(),
+        "ticket_class": {"service_name": service_name, "service_id": service[-1]},
         "priority": opt.priority,
     }
