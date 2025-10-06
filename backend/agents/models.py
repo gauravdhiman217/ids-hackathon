@@ -52,3 +52,39 @@ class SqlCommand(models.Model):
         return f"Command {self.command_id}: {self.description or 'No Description'}"
     
     
+class TicketState(models.Model):
+    state_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    is_valid = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+
+class TicketLog(models.Model):
+    EVENT_CHOICES = [
+    ('webhook', 'Webhook'),
+    ('auto-assign', 'Auto Assign'),
+    ('manual-update', 'Manual Update'),
+    ('override', 'Override'),
+    ('sla-update', 'SLA Update'),
+    ('closed', 'Ticket Closed'),
+]
+    ticket_id = models.IntegerField()
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    type = models.ForeignKey(Type, on_delete=models.SET_NULL, null=True)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True) 
+    priority = models.ForeignKey(TicketPriority, on_delete=models.SET_NULL, null=True)
+    assigned_agent = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True, blank=True)
+    ticket_override = models.BooleanField(default=False)
+    entry_type = models.CharField(max_length=50, choices=EVENT_CHOICES, default='auto-assign')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    ticket_state = models.ForeignKey(TicketState, on_delete=models.SET_NULL, null=True)
+
+
+    def __str__(self):
+        return f"Ticket {self.ticket_id}: {self.title}"
+    
+

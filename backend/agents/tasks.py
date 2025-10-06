@@ -1,6 +1,6 @@
 from celery import shared_task
 from .utils import DatabaseSync, ProcessTicket
-from .models import Agent, Type, Service, TicketPriority, SqlCommand
+from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState
 from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
 
 
@@ -11,7 +11,8 @@ def process_ticket_data(ticket_id):
     print(f"Processing ticket data for ticket ID: {ticket_id}")
     ticket_processor = ProcessTicket()
     ticket = ticket_processor.fetch_ticket(ticket_id)
-    
+    if ticket:
+        ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
     return {"ticket_id": ticket_id, "status": "processed"}
 
 
@@ -68,6 +69,15 @@ def sync_database():
                         "update_time": service[5],
                         "solution_time": service[6],
                         "is_valid": True if service[7] == 1 else False,
+                    }
+                )
+        elif command.description == "get_states":
+            for state in data:
+                state, _ = TicketState.objects.update_or_create(
+                    state_id = state[0],
+                    name = state[1],
+                    defaults={
+                        "is_valid": True if state[2] == 1 else False,
                     }
                 )
 

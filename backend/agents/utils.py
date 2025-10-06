@@ -1,6 +1,7 @@
 import os
 from pyotrs import Client
 import mysql.connector
+from .models import TicketLog, Agent, Type, Service, TicketPriority, TicketState
 
 class DatabaseSync:
     def __init__(self):
@@ -97,5 +98,27 @@ class ProcessTicket:
             update_data[key] = val
         if update_data:
             self.client.ticket_update(ticket_id, **update_data)
+            return True
+        return False
+    
+    def store_ticket_log(self, ticket_id, ticket_object, entry_type="auto-assign"):
+        """
+        Store a log entry for a ticket.
+        
+        log_entry should be a dictionary with keys like Title, Body, TypeID, etc.
+        """
+        ticket = TicketLog.objects.filter(ticket_id=ticket_object.field_get("TicketID")).order_by('-created_at').first()
+        if not ticket:
+            TicketLog.objects.create(
+                ticket_id=ticket_id,
+                title=ticket_object.field_get('Title', ''),
+                body= ticket_object.articles[0].field_get('Body', '') if ticket_object.articles else '',
+                type = Type.objects.filter(type_id=ticket_object.field_get('TypeID')).first(),
+                service = Service.objects.filter(service_id=ticket_object.field_get('ServiceID')).first(),
+                priority = TicketPriority.objects.filter(priority_id=ticket_object.field_get('PriorityID')).first(),
+                assigned_agent = Agent.objects.filter(agent_id=ticket_object.field_get('OwnerID')).first(),
+                entry_type = entry_type,
+                ticket_state = TicketState.objects.filter(state_id=ticket_object.field_get('StateID')).first()
+            )
             return True
         return False
