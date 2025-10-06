@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import WebhookView, AgentViewSet, TypeViewSet, ServiceViewSet, TicketPriorityViewSet
+from .views import WebhookView, AgentViewSet, TypeViewSet, ServiceViewSet, TicketPriorityViewSet, AgentSkillView
 
 
 router = DefaultRouter()
@@ -13,6 +13,7 @@ urlpatterns = [
     path("", include(router.urls)),   
     path("types/", TypeViewSet.as_view()),
     path("services/", ServiceViewSet.as_view()),
+    path("skills/", AgentSkillView.as_view()),
     path("ticket-priorities/", TicketPriorityViewSet.as_view()),
 
 ]

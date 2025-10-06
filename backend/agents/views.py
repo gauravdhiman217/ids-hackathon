@@ -4,7 +4,7 @@ from .tasks import process_ticket_data
 from rest_framework import viewsets, generics
 
 from .models import Agent
-from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
+from .serializers import AgentSerializer, AgentSkillSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
 from .models import Agent, Type, Service, TicketPriority
 from core.base import BaseModelViewSet,BaseRetrieveListView
 
@@ -53,3 +53,8 @@ class TicketPriorityViewSet(BaseRetrieveListView):
     serializer_class = TicketPrioritySerializer
     pagination_class = None
 
+
+class AgentSkillView(BaseRetrieveListView):
+    queryset = Agent.objects.filter(is_valid=True, role__isnull=False).distinct("role")
+    serializer_class = AgentSkillSerializer
+    pagination_class = None

@@ -7,6 +7,10 @@ class AgentSerializer(serializers.ModelSerializer):
         model = Agent
         fields = '__all__'
 
+class AgentSkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Agent
+        fields = ['role']
 
 
 
