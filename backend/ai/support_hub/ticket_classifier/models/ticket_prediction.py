@@ -1,12 +1,16 @@
 from pydantic import BaseModel, Field
-from .categories_probabilities import CategoriesProbabilities
+
 from .priority import Priority
+from .services_probabilities import ServicesProbabilities
+from .types_probabilities import TicketTypeProbabilities
 
 
 class TicketPrediction(BaseModel):
-    categories_probabilities: CategoriesProbabilities = Field(
-        ...,
-        description="Probability scores for each ticket category."
+    services_probabilities: ServicesProbabilities = Field(
+        ..., description="Probability scores for ticket service."
+    )
+    type_probabilities: TicketTypeProbabilities = Field(
+        ..., description="Probability scores for ticket type."
     )
     priority: Priority = Field(
         ...,
