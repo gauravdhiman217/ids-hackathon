@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "accounts",
     "rest_framework_simplejwt.token_blacklist",
     "agents",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -164,6 +165,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 LOGGING = {
     "version": 1,
@@ -244,3 +246,4 @@ LOGGING = {
         },
     },
 }
+

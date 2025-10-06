@@ -48,7 +48,17 @@ services:
       - django
       - redis
     ports: []
+    entrypoint: []
 
+  celery-beat:
+    <<: *django
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - .:/app:rw
+    depends_on:
+      - django
+      - redis
+    ports: []
     entrypoint: []
     
   redis:
