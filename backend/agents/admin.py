@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Agent, Type, Service, TicketPriority, SqlCommand
+
+admin.site.register(Agent)
+admin.site.register(Type)
+admin.site.register(Service)
+admin.site.register(TicketPriority)
+admin.site.register(SqlCommand) 
