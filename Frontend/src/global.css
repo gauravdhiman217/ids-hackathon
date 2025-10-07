@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-Aldrich: "Aldrich", sans-serif;
+}
+
+@theme inline {
+  --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
+ 
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.dark .cta-section div button:hover {
+  border : 2px solid white !important;
+  color: black !important;
+  background-color: rgba(255, 255, 255, 0.829) !important;
+}
+.cta-section div button:hover{
+  border : 2px solid oklch(87.1% 0.006 286.286) !important;
+  color: black !important;
+}
+
+.cta-section div:first-child button{
+  background-color: black !important;
+  color: white;
+}
+.dark .cta-section div:first-child button {
+  border: 2px solid oklch(67.999% 0.00152 285.604) !important;
+
+}
+.cta-section div:first-child button:hover{
+  border: 2px solid oklch(87.1% 0.006 286.286) !important;
+  color: white !important;
+  box-shadow: none !important;
+  background-color: rgb(36, 35, 35) !important;
+}
