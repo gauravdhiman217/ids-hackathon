@@ -5,7 +5,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.language_models.chat_models import BaseChatModel
 from langsmith import traceable
 
-
+@traceable
 def get_model(temperature: float = 0.2) -> BaseChatModel:
     """
     Get a configured chat model with automatic provider fallback.
