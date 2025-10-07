@@ -230,13 +230,13 @@ export function NavbarLogo() {
       href="https://react.dev"
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
-      <img
+      {/* <img
         src={ReactLogo}
         alt="logo"
         width={30}
         height={25}
-      />
-      <span className="font-Aldrich mt-1 text-xl text-black dark:text-white ">Turbo</span>
+      /> */}
+      <span className="mt-1 text-xl text-black dark:text-white">AssistEdge</span>
     </a>
   );
 }

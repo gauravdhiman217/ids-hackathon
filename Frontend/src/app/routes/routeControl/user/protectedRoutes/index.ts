@@ -1,8 +1,8 @@
 import { baseRoutes } from "@shared/constants";
 
 const protectedRoutes = {
-  EMAIL: {
-    path: `${baseRoutes.userBaseRoutes}email`
+  TEAM_MANAGEMENT: {
+    path: `${baseRoutes.userBaseRoutes}team`
   },
   DASHBOARD: {
     path: `${baseRoutes.userBaseRoutes}dashboard`

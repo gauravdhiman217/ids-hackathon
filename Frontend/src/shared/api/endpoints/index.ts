@@ -1,1 +1,1 @@
-export * from "./github"
+export * from "./common"

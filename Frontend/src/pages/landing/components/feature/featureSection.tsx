@@ -18,7 +18,7 @@ export function Features() {
   return (
     <section key={theme} className="py-16 md:py-32 transition-colors duration-300">
       <div className="@container max-w-6xl m-auto ">
-        {/* Section Title */}
+      
         <div className="text-center">
           <h2 className="text-balance text-4xl font-semibold lg:text-5xl text-zinc-950 dark:text-zinc-100">
             Built to cover your needs
@@ -27,10 +27,10 @@ export function Features() {
             Libero sapiente aliquam quibusdam aspernatur, praesentium iusto repellendus.
           </p>
         </div>
-        {/* Feature Grid */}
+       
         <AnimatedWrapper className="flex justify-center items-center" preset="slide">
           <div className="@min-4xl:max-w-full @min-4xl:grid-cols-3 mt-8 grid max-w-lg gap-10 *:text-center md:mt-16">
-            {/* Card 1 */}
+            
             <Card
               className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800
@@ -54,7 +54,7 @@ export function Features() {
               </CardContent>
             </Card>
 
-            {/* Card 2 */}
+           
             <Card
               className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800
@@ -78,7 +78,7 @@ export function Features() {
               </CardContent>
             </Card>
 
-            {/* Card 3 */}
+           
             <Card
               className="group transition-colors duration-300
             border border-zinc-200 dark:border-zinc-800

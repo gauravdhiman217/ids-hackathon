@@ -3,6 +3,9 @@ import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { NotFound } from "@shared/components/ui";
 import { routesMap } from "./routeControl";
+import Login from "@/pages/login";
+import { ProtectedLayout } from "../layout";
+import Dashboard from "@/pages/dashboard";
 
 // layouts
 const GuestLayout = lazy(() => import("@/app/layout/GuestLayout").then((m) => ({ default: m.GuestLayout })));
@@ -38,7 +41,7 @@ const routes = () => [
     ),
     children: [
       { path: routesMap.HOME.path, element: <LandingPage /> },
-      { path: routesMap.LOGIN.path, element: <div>Login Page</div> },
+      { path: routesMap.LOGIN.path, element: <Login /> },
       { path: routesMap.INVITE.path, element: <div>Invite Page</div> }
     ]
   },
@@ -46,12 +49,12 @@ const routes = () => [
   {
     element: (
       <Suspense fallback={Loader}>
-        <div className="bg-white w-full min-h-[100vh] text-black dark:text-white dark:bg-black">Protected Layout</div>
+        <div className="bg-white w-full min-h-[100vh] text-black dark:text-white dark:bg-black"><ProtectedLayout/></div>
       </Suspense>
     ),
     children: [
-      { path: routesMap.DASHBOARD.path, element: <div className="bg-white dark:bg-black w-full min-h-100vh">Dashboard Page</div> },
-      { path: routesMap.EMAIL.path, element: <div>Email Page</div> }
+      { path: routesMap.DASHBOARD.path, element: <div className="bg-white dark:bg-black w-full min-h-100vh"><Dashboard /></div> },
+      { path: routesMap.TEAM_MANAGEMENT.path, element: <div>Team Page</div> }
     ]
   },
   { path: "*", element: <NotFound /> }

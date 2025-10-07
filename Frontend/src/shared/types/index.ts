@@ -12,3 +12,6 @@ export interface UseDebouncedFetchResult<T> {
   data: T | null;
 }
 export type FetchFunction<T> = (debouncedValue: string) => Promise<T>;
+
+export type BodyData = FormData | Record<string, any>
+export type QueryParams = Record<string, any>
