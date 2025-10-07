@@ -21,7 +21,34 @@ Given the ticket, provide the following:
 
 {format_instructions}
 
-Ticket Description:
+Ticket:
+```
+{ticket}
+```
+"""
+
+    return PromptTemplate(
+        template=template,
+        input_variables=["ticket"],
+        partial_variables={"format_instructions": format_instructions},
+    )
+
+
+def get_ticket_classification_prompt_roles(format_instructions: str) -> PromptTemplate:
+    template = """
+You are an IT support ticket classifier.
+
+Given the ticket, provide the following:
+
+role: a single resolver role to assign this ticket to.
+   - Return exactly one string that matches character-for-character one of the provided roles.
+   - Do not invent or modify role names.
+   - If multiple roles could apply, choose the most specialized technical role aligned with the primary action implied by the ticket.
+   - If unable to confidently select an exact match from the provided roles, return "Manager" by default.
+
+{format_instructions}
+
+Ticket:
 ```
 {ticket}
 ```
