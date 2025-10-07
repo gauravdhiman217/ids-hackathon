@@ -48,6 +48,16 @@ class ServiceViewSet(BaseRetrieveListView):
     serializer_class = ServiceSerializer
     pagination_class = None
 
+    def get_queryset(self):
+        top_service_ids = (
+            TicketLog.objects.filter(service__isnull=False)
+            .values('service__service_id')
+            .annotate(ticket_count=Count('ticket_id', distinct=True))
+            .order_by('-ticket_count')[:5]
+            .values_list('service__service_id', flat=True)
+        )
+        return Service.objects.filter(service_id__in=top_service_ids)
+
 
 class TicketPriorityViewSet(BaseRetrieveListView):
     queryset = TicketPriority.objects.all()
@@ -97,8 +107,8 @@ class DashboardView(APIView):
             }
             for a in top_agents
         ]
-        total_open_tickets = TicketLog.objects.filter(ticket_state__id__in=[1, 4, 6, 7, 8]).values('ticket_id').distinct().count()
-        total_closed_tickets = TicketLog.objects.filter(ticket_state__id__in=[2, 3, 5, 9, 10]).values('ticket_id').distinct().count()
+        total_open_tickets = TicketLog.objects.filter(ticket_state__state_id__in=[1, 4, 6, 7, 8]).values('ticket_id').distinct().count()
+        total_closed_tickets = TicketLog.objects.filter(ticket_state__state_id__in=[2, 3, 5, 9, 10]).values('ticket_id').distinct().count()
         dashboard_data = {
             "total_users": total_users,
             "total_tickets": total_tickets,

@@ -54,14 +54,16 @@ def process_ticket_ai(ticket_id):
                 )
             
 def _get_agent_id(role):
-    role = role.strip().replace(" ", "_").lower()
-    agent = Agent.objects.filter(role__iexact=role)
+    role = role.strip()
+    agent = Agent.objects.filter(role__icontains=role)
     if agent.count() < 1:
-        return Agent.objects.filter(role__iexact="Manager").first().agent_id
+        return Agent.objects.filter(role__icontains="Manager").first().agent_id
     if agent.count() == 1:
         return agent.first().agent_id
-    return agent.raw(f"""select agent_id from agents_agent where role ilike '%{role}%' and agent_id not in (
-    select b.agent_id from agents_ticketlog a join agents_agent b on a.assigned_agent_id= b.agent_id where role ilike '%{role}%' group by b.agent_id )""").first().agent_id
+    raw = agent.raw("""select agent_id from agents_agent where role ilike %s and agent_id not in (
+    select b.agent_id from agents_ticketlog a join agents_agent b on a.assigned_agent_id= b.agent_id where role ilike %s group by b.agent_id )""", [role, role])
+    for i in raw:
+        return i.agent_id
 
 
 @shared_task
