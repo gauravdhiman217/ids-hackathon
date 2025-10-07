@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from email.mime.image import MIMEImage
 from django.conf import settings
 import os
+from rest_framework import generics
 
 
 import logging
@@ -104,6 +105,31 @@ class EmailSender:
                 f"Error sending signup OTP email to {self.user.email}: {str(e)}"
             )
             return False
+
+
+class BaseRetrieveListView(generics.ListAPIView, generics.RetrieveAPIView):
+    def list(self, request, *args, **kwargs):
+        response =  super().list(request, *args, **kwargs)
+        return Response(
+            {
+                "status": True,
+                "status_code": response.status_code,
+                "message": "List fetched successfully",
+                "data": response.data
+            }
+        )
+
+    def retrieve(self, request, *args, **kwargs):
+        response =  super().retrieve(request, *args, **kwargs)
+        return Response(
+            {
+                "status": True,
+                "status_code": response.status_code,
+                "message": "List fetched successfully",
+                "data": response.data
+            }
+        )
+
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
