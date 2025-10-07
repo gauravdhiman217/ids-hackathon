@@ -29,6 +29,7 @@ def process_ticket_ai(ticket_id):
         classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
         print(f"AI Classification Result: {classification}")
         priority = classification.get('priority', None)
+        agent = _get_agent_id(classification.get('ticket_class', {}).get("role", None))
         if classification:
             new_ticket = TicketLog.objects.create(
                 ticket_id=ticket.ticket_id,
@@ -39,6 +40,7 @@ def process_ticket_ai(ticket_id):
                 priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,
                 entry_type="auto-assign",
                 ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
+                assigned_agent=Agent.objects.filter(agent_id=agent).first() if agent else None,
             )
             process_ticket = ProcessTicket()
             process_ticket.update_ticket(
@@ -47,8 +49,20 @@ def process_ticket_ai(ticket_id):
                 ServiceID= new_ticket.service.service_id ,
                 PriorityID= classification.get('priority', 3),
                 # StateID= new_ticket.ticket_state.state_id ,
+                OwnerID= new_ticket.assigned_agent.agent_id if new_ticket.assigned_agent else None,
                 SLAID = new_ticket.service.sla_id if new_ticket.service else None,
                 )
+            
+def _get_agent_id(role):
+    role = role.strip().replace(" ", "_").lower()
+    agent = Agent.objects.filter(role__iexact=role)
+    if agent.count() < 1:
+        return Agent.objects.filter(role__iexact="Manager").first().agent_id
+    if agent.count() == 1:
+        return agent.first().agent_id
+    return agent.raw(f"""select agent_id from agents_agent where role ilike '%{role}%' and agent_id not in (
+    select b.agent_id from agents_ticketlog a join agents_agent b on a.assigned_agent_id= b.agent_id where role ilike '%{role}%' group by b.agent_id )""").first().agent_id
+
 
 @shared_task
 def sync_database():
