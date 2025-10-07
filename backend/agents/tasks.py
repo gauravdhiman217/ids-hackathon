@@ -28,7 +28,7 @@ def process_ticket_ai(ticket_id):
     if ticket:
         classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
         print(f"AI Classification Result: {classification}")
-        print(f"Debug: {classification.get('priority', None)}")
+        priority = classification.get('priority', None)
         if classification:
             new_ticket = TicketLog.objects.create(
                 ticket_id=ticket.ticket_id,
@@ -36,7 +36,7 @@ def process_ticket_ai(ticket_id):
                 body=ticket.body,
                 type=Type.objects.filter(type_id=classification.get('ticket_class', {}).get("type", {}).get("type_id", 0)).first(),
                 service=Service.objects.filter(service_id=classification.get('ticket_class', {}).get("service", {}).get("service_id", 0)).first(),
-                priority=TicketPriority.objects.filter(priority_id=2).first(),
+                priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,
                 entry_type="auto-assign",
                 ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
             )
@@ -45,8 +45,8 @@ def process_ticket_ai(ticket_id):
                 ticket_id,
                 TypeID= new_ticket.type.type_id ,
                 ServiceID= new_ticket.service.service_id ,
-                PriorityID= classification.get('priority', 2),
-                StateID= new_ticket.ticket_state.state_id ,
+                PriorityID= classification.get('priority', 3),
+                # StateID= new_ticket.ticket_state.state_id ,
                 SLAID = new_ticket.service.sla_id if new_ticket.service else None,
                 )
 
