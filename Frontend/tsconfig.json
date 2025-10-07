@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@shared/*": ["src/shared/*"]
+    /*
+    
+    => You can define additional aliases below as per your module structure.
+    
+    NOTE:
+    If you add aliases here, make sure to also reflect them in `vite.config.ts` under the `resolve.alias` section.
+
+    Examples:
+    "@features/*": ["src/features/*"],
+    "@config/*": ["src/shared/config/*"],
+    "@hooks/*": ["src/shared/hooks/*"]
+  
+    */
+    },
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src",
+    "vite.config.ts",
+    "src/vite-env.d.ts",
+    "vite-plugin-eslint.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build"]
+}
