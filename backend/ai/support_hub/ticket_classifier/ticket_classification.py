@@ -34,5 +34,5 @@ def run_ticket_classification(ticket: str):
             "service": {"service_name": service_name, "service_id": service[-1]},
             "type": {"type_name": type_name, "type_id": predicted_type[-1]},
         },
-        "priority": opt.priority,
+        "priority": opt.priority.value,
     }

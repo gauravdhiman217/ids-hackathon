@@ -97,11 +97,13 @@ class DashboardView(APIView):
             }
             for a in top_agents
         ]
-
-
+        total_open_tickets = TicketLog.objects.filter(ticket_state__id__in=[1, 4, 6, 7, 8]).values('ticket_id').distinct().count()
+        total_closed_tickets = TicketLog.objects.filter(ticket_state__id__in=[2, 3, 5, 9, 10]).values('ticket_id').distinct().count()
         dashboard_data = {
             "total_users": total_users,
             "total_tickets": total_tickets,
+            "total_open_tickets": total_open_tickets,
+            "total_closed_tickets": total_closed_tickets,
             "tasks_today": tasks_today,
             "top_5_services": top_5_services,
             "top_5_agents": top_5_agents,

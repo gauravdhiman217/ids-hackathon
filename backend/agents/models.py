@@ -58,7 +58,7 @@ class TicketState(models.Model):
     is_valid = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}-{self.state_id}"
     
 
 class TicketLog(models.Model):
@@ -66,8 +66,11 @@ class TicketLog(models.Model):
     ('webhook', 'Webhook'),
     ('auto-assign', 'Auto Assign'),
     ('manual-update', 'Manual Update'),
-    ('override', 'Override'),
-    ('sla-update', 'SLA Update'),
+    ('type-update', 'Type Update'),
+    ('service-update', 'Service Update'),
+    ('priority-update', 'Priority Update'),
+    ('owner-update', 'Owner Update'),
+    ('state-update', 'State Update'),
     ('closed', 'Ticket Closed'),
 ]
     ticket_id = models.IntegerField()
@@ -85,6 +88,6 @@ class TicketLog(models.Model):
 
 
     def __str__(self):
-        return f"Ticket {self.ticket_id}: {self.title}"
+        return f"Ticket {self.ticket_id}: {self.entry_type} - {self.priority} - {self.assigned_agent or 'Unassigned'}"
     
 

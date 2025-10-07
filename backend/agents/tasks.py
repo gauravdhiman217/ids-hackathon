@@ -13,6 +13,11 @@ def process_ticket_data(ticket_id):
     ticket_processor = ProcessTicket()
     ticket = ticket_processor.fetch_ticket(ticket_id)
     if ticket:
+        ticket_obj = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
+        if ticket_obj:
+            print(f"Ticket with ID {ticket_id} already exists. Skipping creation.")
+            ticket_processor.update_ticket_log(ticket_obj.id, ticket)
+            return {"ticket_id": ticket_id, "status": "updating existing ticket"}
         ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
         process_ticket_ai(ticket_id)
     return {"ticket_id": ticket_id, "status": "processed"}
@@ -22,8 +27,28 @@ def process_ticket_ai(ticket_id):
     ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
     if ticket:
         classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
-
         print(f"AI Classification Result: {classification}")
+        print(f"Debug: {classification.get('priority', None)}")
+        if classification:
+            new_ticket = TicketLog.objects.create(
+                ticket_id=ticket.ticket_id,
+                title=ticket.title,
+                body=ticket.body,
+                type=Type.objects.filter(type_id=classification.get('ticket_class', {}).get("type", {}).get("type_id", 0)).first(),
+                service=Service.objects.filter(service_id=classification.get('ticket_class', {}).get("service", {}).get("service_id", 0)).first(),
+                priority=TicketPriority.objects.filter(priority_id=2).first(),
+                entry_type="auto-assign",
+                ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
+            )
+            process_ticket = ProcessTicket()
+            process_ticket.update_ticket(
+                ticket_id,
+                TypeID= new_ticket.type.type_id ,
+                ServiceID= new_ticket.service.service_id ,
+                PriorityID= classification.get('priority', 2),
+                StateID= new_ticket.ticket_state.state_id ,
+                SLAID = new_ticket.service.sla_id if new_ticket.service else None,
+                )
 
 @shared_task
 def sync_database():
