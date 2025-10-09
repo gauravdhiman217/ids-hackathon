@@ -1,0 +1,11 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run frontend linting (only if Frontend files are staged)
+if git diff --cached --name-only | grep -q '^Frontend/'; then
+  echo "🧹 Running lint-staged for frontend..."
+  cd Frontend && npx lint-staged
+  cd ..
+fi

@@ -19,6 +19,7 @@ class Roles(Enum):
     Linux_Admin = "Linux Admin"
     Manager = "Manager"
     cloud_engineer = "cloud engineer"
+    system_admin = "system admin"
 
 
 class Role(BaseModel):

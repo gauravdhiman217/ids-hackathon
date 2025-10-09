@@ -10,7 +10,7 @@ from .prompts.ticket_prompt import (get_ticket_classification_prompt,
 
 
 @traceable
-async def run_ticket_classification(ticket: str):
+def run_ticket_classification(ticket: str):
     model = get_model()
 
     # for initial 3 classification tasks
@@ -37,7 +37,7 @@ async def run_ticket_classification(ticket: str):
     classifications = RunnableParallel(
         classificationi3=prompt_and_model, classification_role=prompt_and_model_role
     )
-    opt = await classifications.ainvoke({"ticket": ticket})
+    opt = classifications.invoke({"ticket": ticket})
     predicted_service = opt.get(
         "classificationi3"
     ).services_probabilities.top_category()

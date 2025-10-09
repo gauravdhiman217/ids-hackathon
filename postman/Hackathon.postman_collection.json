@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ed41487a-8ed6-48bb-b36e-d0286d8a424a",
+		"_postman_id": "14c05c62-829f-4eba-be84-95456231bb1a",
 		"name": "Hackathon",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37516346"
@@ -253,6 +253,138 @@
 								"api",
 								"auth",
 								"check",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ticket-Processing",
+			"item": [
+				{
+					"name": "webhook",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"TicketID\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_host}}/webhook/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"webhook",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local_host}}/types/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"types",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local_host}}/services/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"services",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get priority",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local_host}}/ticket-priorities/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"ticket-priorities",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Agents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local_host}}/agents/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"agents",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update agent role",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"Cloud Engineer\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local_host}}/agents/48/",
+							"host": [
+								"{{local_host}}"
+							],
+							"path": [
+								"agents",
+								"48",
 								""
 							]
 						}
