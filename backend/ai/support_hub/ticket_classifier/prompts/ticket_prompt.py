@@ -34,6 +34,7 @@ Ticket:
     )
 
 
+@traceable
 def get_ticket_classification_prompt_roles(format_instructions: str) -> PromptTemplate:
     template = """
 You are an IT support ticket classifier.
