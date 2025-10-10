@@ -40,15 +40,18 @@ class RAGConfig:
     """Configuration for RAG pipeline components."""
 
     # Prompt template
-    ANSWER_TEMPLATE = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-Keep the answer as concise as possible.
+    ANSWER_TEMPLATE = """You are an IT support assistant. Use the provided knowledge base context to answer the support query.
 
-Context: {context}
+Knowledge Base Context:
+{context}
 
-Question: {question}
+User Query: {question}
 
-Answer:"""
+Instructions:
+- Provide a clear, actionable answer based on the context
+- If troubleshooting steps are mentioned, list them in order
+- Keep technical language appropriate for the user's level
+- Be helpful and professional"""
 
     # Embedding model configuration
     # EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
