@@ -1,5 +1,6 @@
 volumes:
   dbdata: {}
+  frontend_dist: {}
 services:
   django:
     &django
@@ -28,13 +29,26 @@ services:
     restart: always
     ports:
       - 8000:8080
+  frontend:
+    build:
+      context: .
+      dockerfile: ./Frontend/Dockerfile
+    volumes:
+      - ./Frontend:/app:rw
+      - frontend_dist:/app/dist:rw
+    ports:
+      - 3000:3000
+    
+    depends_on:
+      - django
   nginx:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile-nginx
+      dockerfile: ./nginx/Dockerfile-nginx
     restart: always
     volumes:
       - ./backend/static:/backend/static
+      - frontend_dist:/frontend/dist:rw
     ports:
       - 80:80
     depends_on:

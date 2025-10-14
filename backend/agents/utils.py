@@ -92,6 +92,7 @@ class ProcessTicket:
         kwargs can include fields like Title, QueueID, StateID, PriorityID, OwnerID, TypeID, ServiceID
         
         """
+        self.client.session_restore_or_create()
         update_data = {}
         for key, val in kwargs.items():
             update_data[key] = val

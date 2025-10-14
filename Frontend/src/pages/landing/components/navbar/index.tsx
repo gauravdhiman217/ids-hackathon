@@ -7,7 +7,7 @@ import {
   useMotionValueEvent
 } from "motion/react";
 import React, { useRef, useState } from "react";
-import ReactLogo from "@/assets/logo/react.svg"
+// import ReactLogo from "@/assets/logo/react.svg"
 
 interface NavbarProps {
   children: React.ReactNode;

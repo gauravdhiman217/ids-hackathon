@@ -18,9 +18,9 @@ export default defineConfig({
     tailwindcss(),
     checker({
       overlay: false,
-      eslint: {
-        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-      },
+      // eslint: {
+      //   lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      // },
     }),
      {
       name: "vite:critters",

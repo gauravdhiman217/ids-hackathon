@@ -6,21 +6,25 @@ from ai.support_hub.ticket_classifier.ticket_classification import run_ticket_cl
 
 
 
-
-@shared_task
-def process_ticket_data(ticket_id):
-    print(f"Processing ticket data for ticket ID: {ticket_id}")
-    ticket_processor = ProcessTicket()
-    ticket = ticket_processor.fetch_ticket(ticket_id)
-    if ticket:
-        ticket_obj = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
-        if ticket_obj:
-            print(f"Ticket with ID {ticket_id} already exists. Skipping creation.")
-            ticket_processor.update_ticket_log(ticket_obj.id, ticket)
-            return {"ticket_id": ticket_id, "status": "updating existing ticket"}
-        ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
-        process_ticket_ai(ticket_id)
-    return {"ticket_id": ticket_id, "status": "processed"}
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def process_ticket_data(self, ticket_id):
+    try:
+        print(f"Processing ticket data for ticket ID: {ticket_id}")
+        ticket_processor = ProcessTicket()
+        ticket = ticket_processor.fetch_ticket(ticket_id)
+        if ticket:
+            ticket_obj = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
+            if ticket_obj:
+                print(f"Ticket with ID {ticket_id} already exists. Skipping creation.")
+                ticket_processor.update_ticket_log(ticket_obj.id, ticket)
+                return {"ticket_id": ticket_id, "status": "updating existing ticket"}
+            ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
+            process_ticket_ai(ticket_id)
+        return {"ticket_id": ticket_id, "status": "processed"}
+    except Exception as e:
+        print(f"Error processing ticket ID {ticket_id}: {e}")
+        TicketLog.objects.filter(ticket_id=ticket_id).delete()
+        self.retry(exc=e, countdown=2 ** self.request.retries)
 
 def process_ticket_ai(ticket_id):
     print(f"Processing ticket data with AI for ticket ID: {ticket_id}")
@@ -30,6 +34,7 @@ def process_ticket_ai(ticket_id):
         print(f"AI Classification Result: {classification}")
         priority = classification.get('priority', None)
         agent = _get_agent_id(classification.get('ticket_class', {}).get("role", None))
+        print(f"Assigned Agent ID: '{agent}' {type(agent)}, Priority: {priority}")
         if classification:
             new_ticket = TicketLog.objects.create(
                 ticket_id=ticket.ticket_id,
@@ -48,11 +53,11 @@ def process_ticket_ai(ticket_id):
                 TypeID= new_ticket.type.type_id ,
                 ServiceID= new_ticket.service.service_id ,
                 PriorityID= classification.get('priority', 3),
-                # StateID= new_ticket.ticket_state.state_id ,
-                OwnerID= new_ticket.assigned_agent.agent_id if new_ticket.assigned_agent else None,
+                OwnerID = agent if agent else None,
                 SLAID = new_ticket.service.sla_id if new_ticket.service else None,
                 )
-            
+
+
 def _get_agent_id(role):
     role = role.strip()
     agent = Agent.objects.filter(role__icontains=role)
@@ -60,10 +65,7 @@ def _get_agent_id(role):
         return Agent.objects.filter(role__icontains="Manager").first().agent_id
     if agent.count() == 1:
         return agent.first().agent_id
-    raw = agent.raw("""select agent_id from agents_agent where role ilike %s and agent_id not in (
-    select b.agent_id from agents_ticketlog a join agents_agent b on a.assigned_agent_id= b.agent_id where role ilike %s group by b.agent_id )""", [role, role])
-    for i in raw:
-        return i.agent_id
+    return agent.order_by('?').first().agent_id  # Randomly select one agent if multiple match
 
 
 @shared_task
