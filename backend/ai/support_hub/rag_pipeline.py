@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-import torch
+import GPUtil
+# import torch
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.language_models.base import BaseLanguageModel
@@ -18,7 +19,10 @@ from .retriever_factory import create_multi_query_retriever
 
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 # Set device for embeddings
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+# Get a list of all GPUs
+
+device = "cuda" if GPUtil.getGPUs() else "cpu"
 
 # Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
