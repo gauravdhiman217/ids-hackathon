@@ -20,6 +20,7 @@ def process_ticket_data(ticket_id):
         ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
         print(f"Running both AI models asynchronously for ticket {ticket_id}")
         print(f"Starting RAG + Classifier pipelines concurrently for ticket {ticket_id}")
+        #PR: 
         async def run_both_models():
             loop = asyncio.get_event_loop()
             # Run both functions in parallel threads
@@ -80,9 +81,7 @@ def process_ticket_ai_rag(ticket_id):
         return {"ticket_id": ticket_id, "status": "ticket not found"}
 
     question = (
-        f"Classify the following support ticket into type, service, priority, and role for assignment. "
-        f"Respond in JSON format with fields: type, service, priority, role.\n\n"
-        f"Ticket Title: {ticket.title}\n\nTicket Body: {ticket.body}"
+        f"{ticket.title} \n\n {ticket.body}"
     )
     try:
         # Safely run the async RAG pipeline
@@ -107,32 +106,8 @@ def process_ticket_ai_rag(ticket_id):
         print("RAG output not in valid JSON, skipping classification.")
         classification = {}
 
-    priority = classification.get("priority")
-    role = classification.get("role")
-    agent = _get_agent_id(role) if role else None
 
-    if classification:
-        new_ticket = TicketLog.objects.create(
-            ticket_id=ticket.ticket_id,
-            title=ticket.title,
-            body=ticket.body,
-            type=Type.objects.filter(type_id=classification.get("type", {}).get("type_id", 0)).first(),
-            service=Service.objects.filter(service_id=classification.get("service", {}).get("service_id", 0)).first(),
-            priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,
-            entry_type="auto-assign",
-            ticket_state=TicketState.objects.filter(state_id=1).first(),
-            assigned_agent=Agent.objects.filter(agent_id=agent).first() if agent else None,
-        )
 
-        process_ticket = ProcessTicket()
-        process_ticket.update_ticket(
-            ticket_id,
-            TypeID=new_ticket.type.type_id if new_ticket.type else None,
-            ServiceID=new_ticket.service.service_id if new_ticket.service else None,
-            PriorityID=priority or 3,
-            OwnerID=new_ticket.assigned_agent.agent_id if new_ticket.assigned_agent else None,
-            SLAID=new_ticket.service.sla_id if new_ticket.service else None,
-        )
     return {"ticket_id": ticket_id, "status": "RAG processing complete", "classification": classification}
 
 
