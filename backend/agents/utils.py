@@ -1,9 +1,10 @@
 import os
-from pyotrs import Client
+from pyotrs import Article, Client
 import mysql.connector
 from .models import TicketLog, Agent, Type, Service, TicketPriority, TicketState
 from datetime import datetime
-
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 class DatabaseSync:
     def __init__(self):
         self.host = os.getenv("OTRS_DB_HOST", "192.168.10.97")
