@@ -2,12 +2,14 @@
 
 from typing import Any, Dict
 
+from support_hub import model_hub
+from .model_hub import get_model
 from langchain.chat_models import init_chat_model
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
-
-
+from langsmith import traceable
+@traceable
 def create_similarity_retriever(vector_store: VectorStore, k: int = 5) -> BaseRetriever:
     """Create similarity search retriever.
 
@@ -20,7 +22,7 @@ def create_similarity_retriever(vector_store: VectorStore, k: int = 5) -> BaseRe
     """
     return vector_store.as_retriever(search_type="similarity", search_kwargs={"k": k})
 
-
+@traceable
 def create_mmr_retriever(
     vector_store: VectorStore, k: int = 5, lambda_mult: float = 0.5
 ) -> BaseRetriever:
@@ -38,11 +40,9 @@ def create_mmr_retriever(
         search_type="mmr", search_kwargs={"k": k, "lambda_mult": lambda_mult}
     )
 
-
+@traceable
 def create_multi_query_retriever(
     vector_store: VectorStore,
-    model_name: str = "gemini-2.5-flash",
-    model_provider: str = "google_genai",
     k: int = 4,
     lambda_mult: float = 0.5,
 ) -> MultiQueryRetriever:
@@ -58,7 +58,8 @@ def create_multi_query_retriever(
     Returns:
         Configured multi-query retriever
     """
-    llm = init_chat_model(model_name, model_provider=model_provider)
+    llm = get_model()
+    # llm = init_chat_model(model_name, model_provider=model_provider)
     base_retriever = create_mmr_retriever(vector_store, k, lambda_mult)
 
     return MultiQueryRetriever.from_llm(retriever=base_retriever, llm=llm)
