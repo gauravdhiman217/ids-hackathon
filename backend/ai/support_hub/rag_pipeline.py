@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-import GPUtil
-# import torch
+# import GPUtil
+import torch
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.language_models.base import BaseLanguageModel
@@ -19,10 +19,10 @@ from .retriever_factory import create_multi_query_retriever
 
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 # Set device for embeddings
-# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 # Get a list of all GPUs
 
-device = "cuda" if GPUtil.getGPUs() else "cpu"
+# device = "cuda" if GPUtil.getGPUs() else "cpu"
 
 # Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
@@ -137,7 +137,7 @@ class RAGPipeline:
         retrieved_docs = retriever.invoke(state["question"])
         return {"context": retrieved_docs}
 
-    async def _generate(self, state: RAGState) -> dict:
+    def _generate(self, state: RAGState) -> dict:
         """
         Generate answer from retrieved context.
 
@@ -155,7 +155,7 @@ class RAGPipeline:
         )
 
         # Evaluate context relevance
-        evaluated_class = await evaluate_relevance(
+        evaluated_class = evaluate_relevance(
             query=state["question"], retrieved_context=docs_content
         )
 
@@ -184,21 +184,21 @@ class RAGPipeline:
         graph_builder.add_edge(START, "_retrieve")
         return graph_builder.compile()
 
-    async def ainvoke(self, question: str) -> dict:
-        """
-        Asynchronously invoke RAG pipeline.
+    # async def ainvoke(self, question: str) -> dict:
+    #     """
+    #     Asynchronously invoke RAG pipeline.
 
-        Args:
-            question: User question to answer.
+    #     Args:
+    #         question: User question to answer.
 
-        Returns:
-            Dictionary containing answer_found flag and answer content.
-        """
-        result = await self.graph.ainvoke({"question": question})
-        return {
-            "answer_found": result.get("answer_found", False),
-            "answer": result.get("answer"),
-        }
+    #     Returns:
+    #         Dictionary containing answer_found flag and answer content.
+    #     """
+    #     result = await self.graph.ainvoke({"question": question})
+    #     return {
+    #         "answer_found": result.get("answer_found", False),
+    #         "answer": result.get("answer"),
+    #     }
 
     def invoke(self, question: str) -> dict:
         """
@@ -216,22 +216,22 @@ class RAGPipeline:
             "answer": result.get("answer"),
         }
 
-    async def stream(self, question: str):
-        """
-        Stream RAG pipeline execution with intermediate states.
+    # async def stream(self, question: str):
+    #     """
+    #     Stream RAG pipeline execution with intermediate states.
 
-        Args:
-            question: User question to answer.
+    #     Args:
+    #         question: User question to answer.
 
-        Yields:
-            Intermediate states during pipeline execution.
-        """
-        async for state in self.graph.astream({"question": question}):
-            yield state
+    #     Yields:
+    #         Intermediate states during pipeline execution.
+    #     """
+    #     async for state in self.graph.astream({"question": question}):
+    #         yield state
 
 
 # Factory function for easy instantiation
-async def create_rag_pipeline(
+def create_rag_pipeline(
     ticket: str,
     vector_store: Optional[VectorStore] = None,
     llm: Optional[BaseLanguageModel] = None,
@@ -249,5 +249,5 @@ async def create_rag_pipeline(
         Configured RAGPipeline instance.
     """
     pipeline = RAGPipeline(vector_store=vector_store, llm=llm, config=config)
-    result = await pipeline.ainvoke(ticket)
+    result = pipeline.invoke(ticket)
     return {"answer_found": result.get("answer_found"), "answer": result.get("answer")}

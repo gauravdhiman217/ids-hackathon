@@ -2,7 +2,6 @@
 
 from typing import Any, Dict
 
-from support_hub import model_hub
 from .model_hub import get_model
 from langchain.chat_models import init_chat_model
 from langchain.retrievers.multi_query import MultiQueryRetriever

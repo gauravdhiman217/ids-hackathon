@@ -100,7 +100,7 @@ Be strict in your evaluation. Only mark as relevant if the context can genuinely
 
 
 # Convenience function for one-off evaluations
-async def evaluate_relevance(
+def evaluate_relevance(
     query: str, retrieved_context: str, model: Optional[BaseLanguageModel] = None
 ) -> Classification:
     """
@@ -115,5 +115,5 @@ async def evaluate_relevance(
         Classification object with is_relevant flag and reason.
     """
     evaluator = RelevanceEvaluator(model=model)
-    evaluated_class = await evaluator.aevaluate(query, retrieved_context)
+    evaluated_class = evaluator.evaluate(query, retrieved_context)
     return evaluated_class.model_dump()

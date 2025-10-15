@@ -2,13 +2,14 @@ from celery import shared_task
 from .utils import DatabaseSync, ProcessTicket
 from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState
 from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
-from ai.support_hub.ticket_classifier.ticket_classification import run_ticket_classification
+
+
+from celery import group
 
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def process_ticket_data(self, ticket_id):
-    try:
+@shared_task
+def process_ticket_data(ticket_id):
         print(f"Processing ticket data for ticket ID: {ticket_id}")
         ticket_processor = ProcessTicket()
         ticket = ticket_processor.fetch_ticket(ticket_id)
@@ -19,43 +20,63 @@ def process_ticket_data(self, ticket_id):
                 ticket_processor.update_ticket_log(ticket_obj.id, ticket)
                 return {"ticket_id": ticket_id, "status": "updating existing ticket"}
             ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
-            process_ticket_ai(ticket_id)
+            job = group(process_ticket_embedding.s(ticket_id), process_ticket_ai.s(ticket_id))
+            job.apply_async()
         return {"ticket_id": ticket_id, "status": "processed"}
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def process_ticket_embedding(self, ticket_id):
+    try:
+        from ai.support_hub.rag_pipeline import create_rag_pipeline
+        print(f"Processing ticket embedding for ticket ID: {ticket_id}")
+        ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
+        if ticket:
+            embedding = create_rag_pipeline(f"{ticket.title} \n\n {ticket.body}")
+            print(f"Ticket Embedding Result: {embedding}")
+            return embedding
     except Exception as e:
         print(f"Error processing ticket ID {ticket_id}: {e}")
         TicketLog.objects.filter(ticket_id=ticket_id).delete()
         self.retry(exc=e, countdown=2 ** self.request.retries)
 
-def process_ticket_ai(ticket_id):
-    print(f"Processing ticket data with AI for ticket ID: {ticket_id}")
-    ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
-    if ticket:
-        classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
-        print(f"AI Classification Result: {classification}")
-        priority = classification.get('priority', None)
-        agent = _get_agent_id(classification.get('ticket_class', {}).get("role", None))
-        print(f"Assigned Agent ID: '{agent}' {type(agent)}, Priority: {priority}")
-        if classification:
-            new_ticket = TicketLog.objects.create(
-                ticket_id=ticket.ticket_id,
-                title=ticket.title,
-                body=ticket.body,
-                type=Type.objects.filter(type_id=classification.get('ticket_class', {}).get("type", {}).get("type_id", 0)).first(),
-                service=Service.objects.filter(service_id=classification.get('ticket_class', {}).get("service", {}).get("service_id", 0)).first(),
-                priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,
-                entry_type="auto-assign",
-                ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
-                assigned_agent=Agent.objects.filter(agent_id=agent).first() if agent else None,
-            )
-            process_ticket = ProcessTicket()
-            process_ticket.update_ticket(
-                ticket_id,
-                TypeID= new_ticket.type.type_id ,
-                ServiceID= new_ticket.service.service_id ,
-                PriorityID= classification.get('priority', 3),
-                OwnerID = agent if agent else None,
-                SLAID = new_ticket.service.sla_id if new_ticket.service else None,
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def process_ticket_ai(self, ticket_id):
+    try:
+        from ai.support_hub.ticket_classifier.ticket_classification import run_ticket_classification
+        print(f"Processing ticket data with AI for ticket ID: {ticket_id}")
+        ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
+        if ticket:
+            classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
+            print(f"AI Classification Result: {classification}")
+            priority = classification.get('priority', None)
+            agent = _get_agent_id(classification.get('ticket_class', {}).get("role", None))
+            print(f"Assigned Agent ID: '{agent}' {type(agent)}, Priority: {priority}")
+            if classification:
+                new_ticket = TicketLog.objects.create(
+                    ticket_id=ticket.ticket_id,
+                    title=ticket.title,
+                    body=ticket.body,
+                    type=Type.objects.filter(type_id=classification.get('ticket_class', {}).get("type", {}).get("type_id", 0)).first(),
+                    service=Service.objects.filter(service_id=classification.get('ticket_class', {}).get("service", {}).get("service_id", 0)).first(),
+                    priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,
+                    entry_type="auto-assign",
+                    ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
+                    assigned_agent=Agent.objects.filter(agent_id=agent).first() if agent else None,
                 )
+                process_ticket = ProcessTicket()
+                process_ticket.update_ticket(
+                    ticket_id,
+                    TypeID= new_ticket.type.type_id ,
+                    ServiceID= new_ticket.service.service_id ,
+                    PriorityID= classification.get('priority', 3),
+                    OwnerID = agent if agent else None,
+                    SLAID = new_ticket.service.sla_id if new_ticket.service else None,
+                    )
+    except Exception as e:
+        print(f"Error processing ticket ID {ticket_id}: {e}")
+        TicketLog.objects.filter(ticket_id=ticket_id).delete()
+        self.retry(exc=e, countdown=2 ** self.request.retries)
 
 
 def _get_agent_id(role):
