@@ -1,11 +1,29 @@
+from core.base import EmailSender
 from celery import shared_task
 from .utils import DatabaseSync, ProcessTicket
 from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState
 from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
-
+from markdown import markdown
 
 from celery import group
 
+
+BODY = """
+    Dear {0},
+
+    Reply for your Ticket Number {1}
+    
+    {2}
+
+
+    AI Support System
+    IDS Infotech Ltd.
+    website: https://www.idsil.com
+
+    We cannot promise that we will always be perfect. What we can promise is that if something goes wrong we will rise to the occasion, 
+    take action, resolve the issue and accept responsibility.
+
+"""
 
 
 @shared_task
@@ -15,10 +33,10 @@ def process_ticket_data(ticket_id):
         ticket = ticket_processor.fetch_ticket(ticket_id)
         if ticket:
             ticket_obj = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
-            if ticket_obj:
-                print(f"Ticket with ID {ticket_id} already exists. Skipping creation.")
-                ticket_processor.update_ticket_log(ticket_obj.id, ticket)
-                return {"ticket_id": ticket_id, "status": "updating existing ticket"}
+            # if ticket_obj:
+            #     print(f"Ticket with ID {ticket_id} already exists. Skipping creation.")
+            #     ticket_processor.update_ticket_log(ticket_obj.id, ticket)
+            #     return {"ticket_id": ticket_id, "status": "updating existing ticket"}
             ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
             job = group(process_ticket_embedding.s(ticket_id), process_ticket_ai.s(ticket_id))
             job.apply_async()
@@ -31,17 +49,31 @@ def process_ticket_embedding(self, ticket_id):
         print(f"Processing ticket embedding for ticket ID: {ticket_id}")
         ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
         if ticket:
-            embedding = create_rag_pipeline(f"{ticket.title} \n\n {ticket.body}")
-            print(f"Ticket Embedding Result: {embedding}")
-            return embedding
+            answer = create_rag_pipeline(f"{ticket.title} \n\n {ticket.body}")
+            print(f"Ticket answer Result: {answer}")
+            _email_send_ai(ticket, answer)
+            return answer
     except Exception as e:
         print(f"Error processing ticket ID {ticket_id}: {e}")
-        TicketLog.objects.filter(ticket_id=ticket_id).delete()
+        # TicketLog.objects.filter(ticket_id=ticket_id).delete()
         self.retry(exc=e, countdown=2 ** self.request.retries)
+
+def _email_send_ai(ticket, answer):
+    subject = f"RE: [{ticket.ticket_hash}] {ticket.title}"
+    reply = "Your e-mail will be answered in short while. Please wait for a little while. We will get back to you as soon as possible."
+    if answer.get("answer_found", False):
+        html = markdown(answer.get("answer", ""))
+        reply = html
+    body = BODY.format(ticket.ticket_owner.split("@")[0], ticket.ticket_hash , reply)
+    emailSender = EmailSender()
+    emailSender.send_ai_email(subject, body, ticket.ticket_owner)
+
+
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def process_ticket_ai(self, ticket_id):
+    # return "Skipping now"
     try:
         from ai.support_hub.ticket_classifier.ticket_classification import run_ticket_classification
         print(f"Processing ticket data with AI for ticket ID: {ticket_id}")
@@ -57,6 +89,8 @@ def process_ticket_ai(self, ticket_id):
                     ticket_id=ticket.ticket_id,
                     title=ticket.title,
                     body=ticket.body,
+                    ticket_owner = ticket.ticket_owner,
+                    ticket_hash = ticket.ticket_hash,
                     type=Type.objects.filter(type_id=classification.get('ticket_class', {}).get("type", {}).get("type_id", 0)).first(),
                     service=Service.objects.filter(service_id=classification.get('ticket_class', {}).get("service", {}).get("service_id", 0)).first(),
                     priority=TicketPriority.objects.filter(priority_id=priority).first() if priority else None,

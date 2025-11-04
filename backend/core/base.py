@@ -59,9 +59,10 @@ class BasePagination(pagination.PageNumberPagination):
 
 
 class EmailSender:
-    def __init__(self, user):
+    def __init__(self, user=None):
         self.user = user
-        self.email = user.email
+        if user:
+            self.email = self.user.email
         self.from_email = settings.DEFAULT_FROM_EMAIL
 
     def build_html_content(self, template, otp=None):
@@ -106,6 +107,16 @@ class EmailSender:
             )
             return False
 
+    def send_ai_email(self, subject:str, body:str, email:str):
+        email = EmailMultiAlternatives(
+                subject=subject,
+                body=body,
+                from_email=self.from_email,
+                to=[email],
+            )
+        email.send()
+        print("email send to user")
+        
 
 class BaseRetrieveListView(generics.ListAPIView, generics.RetrieveAPIView):
     def list(self, request, *args, **kwargs):

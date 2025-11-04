@@ -74,6 +74,7 @@ class TicketLog(models.Model):
     ('closed', 'Ticket Closed'),
 ]
     ticket_id = models.IntegerField()
+    ticket_owner = models.CharField(max_length=250, null=True, blank=True)
     title = models.CharField(max_length=200)
     body = models.TextField()
     type = models.ForeignKey(Type, on_delete=models.SET_NULL, null=True)
@@ -85,6 +86,7 @@ class TicketLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     ticket_state = models.ForeignKey(TicketState, on_delete=models.SET_NULL, null=True)
+    ticket_hash = models.CharField(max_length=50, null=True, blank=True)
 
 
     def __str__(self):
