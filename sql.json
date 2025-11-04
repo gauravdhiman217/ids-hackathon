@@ -1,0 +1,8 @@
+{
+    "get_state": "select id, name, valid_id from ticket_state;",
+    "get_services": "select a.id as service_id, a.name as service_name,c.id as sla_id,c.name as sla_name ,first_response_time, update_time, solution_time, a.valid_id from service as a join service_sla as b on a.id = b.service_id join sla c on c.id = b.sla_id ;",
+    "get_priority": "select id, name, valid_id from ticket_priority;",
+    "get_type": "select id, name, valid_id from ticket_type;",
+    "get_users": "SELECT id AS UserID, login AS UserLogin, first_name, last_name , valid_id FROM users;"
+
+}      

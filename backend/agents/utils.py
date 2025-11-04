@@ -108,6 +108,7 @@ class ProcessTicket:
         log_entry should be a dictionary with keys like Title, Body, TypeID, etc.
         """
         ticket = TicketLog.objects.filter(ticket_id=ticket_object.field_get("TicketID")).order_by('-created_at').first()
+        print(f"Ticket Owner {ticket_object.field_get("CustomerUserID")} || {ticket_object.field_get("TicketNumber")}")
         if not ticket:
             TicketLog.objects.create(
                 ticket_id=ticket_id,
@@ -118,6 +119,8 @@ class ProcessTicket:
                 priority = TicketPriority.objects.filter(priority_id=ticket_object.field_get('PriorityID')).first() if ticket_object.field_get('PriorityID') else None,
                 assigned_agent = Agent.objects.filter(agent_id=ticket_object.field_get('OwnerID')).first() if ticket_object.field_get('OwnerID') else None,
                 entry_type = entry_type,
+                ticket_hash = ticket_object.field_get('TicketNumber'),
+                ticket_owner = ticket_object.field_get("CustomerUserID"),
                 ticket_state = TicketState.objects.filter(state_id=ticket_object.field_get('StateID')).first() if ticket_object.field_get('StateID') else None,
             )
             return True
