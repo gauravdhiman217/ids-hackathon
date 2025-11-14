@@ -12,7 +12,6 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp" },
-    { name = "gputil" },
     { name = "langchain" },
     { name = "langchain-core" },
     { name = "langchain-google-genai" },
@@ -24,7 +23,6 @@ dependencies = [
     { name = "python-decouple" },
     { name = "python-dotenv" },
     { name = "sentence-transformers" },
-    { name = "standard-distutils" },
 ]
 
 [package.dev-dependencies]
@@ -36,7 +34,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.13.0" },
-    { name = "gputil", specifier = ">=1.4.0" },
     { name = "langchain", specifier = ">=0.3.27" },
     { name = "langchain-core", specifier = ">=0.3.76" },
     { name = "langchain-google-genai", specifier = ">=2.1.12" },
@@ -48,7 +45,6 @@ requires-dist = [
     { name = "python-decouple", specifier = ">=3.8" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "sentence-transformers", specifier = ">=5.1.1" },
-    { name = "standard-distutils", specifier = ">=3.11.9" },
 ]
 
 [package.metadata.requires-dev]
@@ -587,12 +583,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/39/24/33db22342cf4a2ea2
 wheels = [
     { url = "https://files.pythonhosted.org/packages/86/f1/62a193f0227cf15a920390abe675f386dec35f7ae3ffe6da582d3ade42c7/googleapis_common_protos-1.70.0-py3-none-any.whl", hash = "sha256:b8bfcca8c25a2bb253e0e0b0adaf8c00773e5e6af6fd92397576680b807e0fd8", size = 294530, upload-time = "2025-04-14T10:17:01.271Z" },
 ]
-
-[[package]]
-name = "gputil"
-version = "1.4.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ed/0e/5c61eedde9f6c87713e89d794f01e378cfd9565847d4576fa627d758c554/GPUtil-1.4.0.tar.gz", hash = "sha256:099e52c65e512cdfa8c8763fca67f5a5c2afb63469602d5dcb4d296b3661efb9", size = 5545, upload-time = "2018-12-18T09:12:13.63Z" }
 
 [[package]]
 name = "greenlet"
@@ -2621,15 +2611,6 @@ wheels = [
 ]
 
 [[package]]
-name = "standard-distutils"
-version = "3.11.9"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a8/da/c33a5b982f16b41fbe400863d6124377623c33401c34c0814b8302b1c5d0/standard_distutils-3.11.9.tar.gz", hash = "sha256:37d6c9f0f0321ed3c9c923e54b0fdbafa3d7bf556821de55fd8158d7f440deb5", size = 209658, upload-time = "2024-10-30T02:06:21.49Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/1b/b8068593d405562f19ef8dd0b1858709db05fe44c9d25d1dbecc9e1666f8/standard_distutils-3.11.9-py3-none-any.whl", hash = "sha256:9ba3300167f1c95d5a24e9ac2eb323ad6cb146ec0bea703851a7720e8ffd7878", size = 259359, upload-time = "2024-10-30T02:06:19.595Z" },
-]
-
-[[package]]
 name = "sympy"
 version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2816,7 +2797,7 @@ wheels = [
 
 [[package]]
 name = "transformers"
-version = "4.57.0"
+version = "4.57.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -2830,9 +2811,9 @@ dependencies = [
     { name = "tokenizers" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/5c/a22c39dac2687f3fe2a6b97e2c1ae516e91cd4d3976a7a2b7c24ff2fae48/transformers-4.57.0.tar.gz", hash = "sha256:d045753f3d93f9216e693cdb168698dfd2e9d3aad1bb72579a5d60ebf1545a8b", size = 10142956, upload-time = "2025-10-03T17:03:47.177Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/68/a39307bcc4116a30b2106f2e689130a48de8bd8a1e635b5e1030e46fcd9e/transformers-4.57.1.tar.gz", hash = "sha256:f06c837959196c75039809636cd964b959f6604b75b8eeec6fdfc0440b89cc55", size = 10142511, upload-time = "2025-10-14T15:39:26.18Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/2b/4d2708ac1ff5cd708b6548f4c5812d0ae40d1c28591c4c1c762b6dbdef2d/transformers-4.57.0-py3-none-any.whl", hash = "sha256:9d7c6d098c026e40d897e017ed1f481ab803cbac041021dbc6ae6100e4949b55", size = 11990588, upload-time = "2025-10-03T17:03:43.629Z" },
+    { url = "https://files.pythonhosted.org/packages/71/d3/c16c3b3cf7655a67db1144da94b021c200ac1303f82428f2beef6c2e72bb/transformers-4.57.1-py3-none-any.whl", hash = "sha256:b10d05da8fa67dc41644dbbf9bc45a44cb86ae33da6f9295f5fbf5b7890bd267", size = 11990925, upload-time = "2025-10-14T15:39:23.085Z" },
 ]
 
 [[package]]

@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.13.0",
-    "gputil>=1.4.0",
     "langchain>=0.3.27",
     "langchain-core>=0.3.76",
     "langchain-google-genai>=2.1.12",
@@ -18,7 +17,6 @@ dependencies = [
     "python-decouple>=3.8",
     "python-dotenv>=1.1.1",
     "sentence-transformers>=5.1.1",
-    "standard-distutils>=3.11.9",
 ]
 
 [dependency-groups]
