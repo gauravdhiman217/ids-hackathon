@@ -44,7 +44,19 @@ class RAGConfig:
     """Configuration for RAG pipeline components."""
 
     # Prompt template
-    ANSWER_TEMPLATE = """You are an IT support assistant. Use the provided knowledge base context to answer the support query.
+    #     ANSWER_TEMPLATE = """You are an IT support assistant. Use the provided knowledge base context to answer the support query.
+
+    # Knowledge Base Context:
+    # {context}
+
+    # User Query: {question}
+
+    # Instructions:
+    # - Provide a clear, actionable answer based on the context
+    # - If troubleshooting steps are mentioned, list them in order
+    # - Keep technical language appropriate for the user's level
+    # - Be helpful and professional"""
+    ANSWER_TEMPLATE = """You are an IT support assistant. Generate a professional email response body to address the user's support query using the provided knowledge base.
 
 Knowledge Base Context:
 {context}
@@ -52,10 +64,13 @@ Knowledge Base Context:
 User Query: {question}
 
 Instructions:
-- Provide a clear, actionable answer based on the context
-- If troubleshooting steps are mentioned, list them in order
-- Keep technical language appropriate for the user's level
-- Be helpful and professional"""
+- Write only the email body content without greetings or signatures
+- Start directly with acknowledging the issue or providing the solution
+- Use clear, actionable language appropriate for email communication
+- If troubleshooting steps are needed, present them as numbered steps
+- Keep tone professional yet friendly
+- Do not include subject lines, "Dear User", or closing signatures
+- Output should be ready to paste into an email reply"""
 
     # Embedding model configuration
     # EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
