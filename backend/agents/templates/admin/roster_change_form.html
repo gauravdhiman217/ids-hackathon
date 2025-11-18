@@ -1,0 +1,97 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="module">
+
+    <h2>
+        Roster
+        {% if original %}
+            — {{ original.agent }}
+        {% endif %}
+    </h2>
+
+    {{ adminform.media }}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {{ adminform.form.non_field_errors }}
+
+        <div style="margin-bottom:12px;">
+            {{ adminform.form.agent.label_tag }}
+            <div>{{ adminform.form.agent.errors }}{{ adminform.form.agent }}</div>
+            &nbsp;&nbsp;
+            {{ adminform.form.week_start.label_tag }}
+            <div>{{ adminform.form.week_start.errors }}{{ adminform.form.week_start }}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                {% if week_dates %}
+                    {% for d in week_dates %}
+                        <th style="padding:6px;border:1px solid #ccc;text-align:center;">
+                            {{ d|date:"D" }}<br><small>{{ d|date:"Y-m-d" }}</small>
+                        </th>
+                    {% endfor %}
+                {% else %}
+                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th>
+                    <th>Fri</th><th>Sat</th><th>Sun</th>
+                {% endif %}
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>
+                        {{ adminform.form.mon_status.errors }}{{ adminform.form.mon_status }}<br>
+                        {{ adminform.form.mon_start.errors }}{{ adminform.form.mon_start }}<br>
+                        {{ adminform.form.mon_end.errors }}{{ adminform.form.mon_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.tue_status.errors }}{{ adminform.form.tue_status }}<br>
+                        {{ adminform.form.tue_start.errors }}{{ adminform.form.tue_start }}<br>
+                        {{ adminform.form.tue_end.errors }}{{ adminform.form.tue_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.wed_status.errors }}{{ adminform.form.wed_status }}<br>
+                        {{ adminform.form.wed_start.errors }}{{ adminform.form.wed_start }}<br>
+                        {{ adminform.form.wed_end.errors }}{{ adminform.form.wed_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.thu_status.errors }}{{ adminform.form.thu_status }}<br>
+                        {{ adminform.form.thu_start.errors }}{{ adminform.form.thu_start }}<br>
+                        {{ adminform.form.thu_end.errors }}{{ adminform.form.thu_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.fri_status.errors }}{{ adminform.form.fri_status }}<br>
+                        {{ adminform.form.fri_start.errors }}{{ adminform.form.fri_start }}<br>
+                        {{ adminform.form.fri_end.errors }}{{ adminform.form.fri_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.sat_status.errors }}{{ adminform.form.sat_status }}<br>
+                        {{ adminform.form.sat_start.errors }}{{ adminform.form.sat_start }}<br>
+                        {{ adminform.form.sat_end.errors }}{{ adminform.form.sat_end }}
+                    </td>
+                    <td>
+                        {{ adminform.form.sun_status.errors }}{{ adminform.form.sun_status }}<br>
+                        {{ adminform.form.sun_start.errors }}{{ adminform.form.sun_start }}<br>
+                        {{ adminform.form.sun_end.errors }}{{ adminform.form.sun_end }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        {# Hidden fields required for admin internals #}
+        {% for hidden in adminform.form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+
+        <div class="submit-row">
+            <input type="submit" name="_save" value="Save" class="default" />
+        </div>
+
+    </form>
+</div>
+{% endblock %}

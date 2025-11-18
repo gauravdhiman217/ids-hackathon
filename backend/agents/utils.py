@@ -121,6 +121,7 @@ class ProcessTicket:
                 entry_type = entry_type,
                 ticket_hash = ticket_object.field_get('TicketNumber'),
                 ticket_owner = ticket_object.field_get("CustomerUserID"),
+                ticket_queue = ticket_object.field_get('QueueID'),
                 ticket_state = TicketState.objects.filter(state_id=ticket_object.field_get('StateID')).first() if ticket_object.field_get('StateID') else None,
             )
             return True

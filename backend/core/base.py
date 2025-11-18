@@ -107,12 +107,17 @@ class EmailSender:
             )
             return False
 
-    def send_ai_email(self, subject:str, body:str, email:str):
+    def send_ai_email(self, subject:str, body:str, email:str, mime_data=None):
+        extra_headers = {
+                "In-Reply-To": mime_data[8],
+                "References": mime_data[8],
+            }
         email = EmailMultiAlternatives(
                 subject=subject,
                 body=body,
                 from_email=self.from_email,
-                to=[email],
+                to=[email, "no-reply@idsil.com"],
+                headers=extra_headers
             )
         email.send()
         print("email send to user")

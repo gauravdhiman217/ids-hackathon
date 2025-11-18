@@ -1,4 +1,8 @@
+from datetime import timedelta
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
 
 
     
@@ -24,16 +28,94 @@ class Service(models.Model):
     def __str__(self):
         return self.service_name
 
+class Location(models.Model):
+    location_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    queue = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Agent(models.Model):
     agent_id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     user_name = models.CharField(max_length=100, unique=True)
     role = models.CharField(max_length=100, blank=True, null=True)
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
     is_valid = models.BooleanField(default=True)
+    skills = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.role}"
+
+
+class Roster(models.Model):
+
+    class RosterStatus(models.TextChoices):
+        ON_DUTY = 'ON', _('On Duty')
+        OFF = 'OFF', _('Off')
+        LEAVE = 'LEAVE', _('Leave')
+
+    agent = models.ForeignKey(
+        'Agent',
+        on_delete=models.CASCADE,
+        related_name='rosters'
+    )
+    week_start = models.DateField(help_text="Monday of the ISO week")
+
+    mon_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    tue_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    wed_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    thu_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    fri_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    sat_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    sun_status = models.CharField(max_length=5, choices=RosterStatus.choices,
+                                  default=RosterStatus.ON_DUTY)
+    mon_start = models.TimeField(null=True, blank=True)
+    mon_end   = models.TimeField(null=True, blank=True)
+    tue_start = models.TimeField(null=True, blank=True)
+    tue_end   = models.TimeField(null=True, blank=True)
+    wed_start = models.TimeField(null=True, blank=True)
+    wed_end   = models.TimeField(null=True, blank=True)
+    thu_start = models.TimeField(null=True, blank=True)
+    thu_end   = models.TimeField(null=True, blank=True)
+    fri_start = models.TimeField(null=True, blank=True)
+    fri_end   = models.TimeField(null=True, blank=True)
+    sat_start = models.TimeField(null=True, blank=True)
+    sat_end   = models.TimeField(null=True, blank=True)
+    sun_start = models.TimeField(null=True, blank=True)
+    sun_end   = models.TimeField(null=True, blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('agent', 'week_start')
+        ordering = ('-week_start', 'agent')
+
+    def __str__(self):
+        y, w, _ = self.week_start.isocalendar()
+        return f"{self.agent} — {y}-W{w:02d}"
+
+    def week_dates(self):
+        """List of actual calendar dates (Mon–Sun)."""
+        return [
+            self.week_start + timedelta(days=i)
+            for i in range(7)
+        ]
+
 
 class TicketPriority(models.Model):
     priority_id = models.IntegerField(primary_key=True)
@@ -87,7 +169,7 @@ class TicketLog(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     ticket_state = models.ForeignKey(TicketState, on_delete=models.SET_NULL, null=True)
     ticket_hash = models.CharField(max_length=50, null=True, blank=True)
-
+    ticket_queue = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"Ticket {self.ticket_id}: {self.entry_type} - {self.priority} - {self.assigned_agent or 'Unassigned'}"

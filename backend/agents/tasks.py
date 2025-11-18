@@ -1,11 +1,12 @@
 from core.base import EmailSender
 from celery import shared_task
 from .utils import DatabaseSync, ProcessTicket
-from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState
+from .models import Agent, Type, Service, TicketPriority, SqlCommand, TicketLog, TicketState, Location, Roster
 from .serializers import AgentSerializer, TypeSerializer, ServiceSerializer, TicketPrioritySerializer
 from markdown import markdown
 
 from celery import group
+from datetime import datetime, date, time
 
 
 BODY = """
@@ -50,6 +51,7 @@ def process_ticket_embedding(self, ticket_id):
         ticket = TicketLog.objects.filter(ticket_id=ticket_id).order_by('-created_at').first()
         if ticket:
             answer = create_rag_pipeline(f"{ticket.title} \n\n {ticket.body}")
+            # answer = {"answer_found": True, "answer": "This is a placeholder answer from RAG pipeline."}
             print(f"Ticket answer Result: {answer}")
             _email_send_ai(ticket, answer)
             return answer
@@ -59,17 +61,25 @@ def process_ticket_embedding(self, ticket_id):
         self.retry(exc=e, countdown=2 ** self.request.retries)
 
 def _email_send_ai(ticket, answer):
-    subject = f"RE: [{ticket.ticket_hash}] {ticket.title}"
+    subject = f"RE: [Ticket#{ticket.ticket_hash}] {ticket.title}"
     reply = "Your e-mail will be answered in short while. Please wait for a little while. We will get back to you as soon as possible."
     if answer.get("answer_found", False):
         html = markdown(answer.get("answer", ""))
         reply = html
     body = BODY.format(ticket.ticket_owner.split("@")[0], ticket.ticket_hash , reply)
+    data = fetch_email_mime(ticket)
     emailSender = EmailSender()
-    emailSender.send_ai_email(subject, body, ticket.ticket_owner)
+    emailSender.send_ai_email(subject, body, ticket.ticket_owner, mime_data=data)
 
-
-
+def fetch_email_mime(ticket):
+    SQL = f"""
+        SELECT  m.* FROM article a join article_data_mime m on a.id = m.article_id WHERE a.ticket_id = {ticket.ticket_id} ORDER BY m.create_time LIMIT 1;
+    """
+    db_sync = DatabaseSync()
+    data = db_sync.fetch_one(SQL)
+    if data:
+        print("Email MIME data found.", data)
+    return data
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def process_ticket_ai(self, ticket_id):
@@ -82,8 +92,12 @@ def process_ticket_ai(self, ticket_id):
             classification = run_ticket_classification(f"{ticket.title} \n\n {ticket.body}")
             print(f"AI Classification Result: {classification}")
             priority = classification.get('priority', None)
-            agent = _get_agent_id(classification.get('ticket_class', {}).get("role", None))
-            print(f"Assigned Agent ID: '{agent}' {type(agent)}, Priority: {priority}")
+            role = classification.get('ticket_class', {}).get("role", None)
+            
+            # Allocate agent based on queue and role
+            agent = _get_agent_by_queue_and_role(ticket.ticket_queue, role)
+            
+            print(f"Assigned Agent ID: '{agent}' Priority: {priority}")
             if classification:
                 new_ticket = TicketLog.objects.create(
                     ticket_id=ticket.ticket_id,
@@ -97,6 +111,7 @@ def process_ticket_ai(self, ticket_id):
                     entry_type="auto-assign",
                     ticket_state=TicketState.objects.filter(state_id=1).first(),  # Assuming 1 is the ID for 'New' state
                     assigned_agent=Agent.objects.filter(agent_id=agent).first() if agent else None,
+                    ticket_queue=ticket.ticket_queue,
                 )
                 process_ticket = ProcessTicket()
                 process_ticket.update_ticket(
@@ -113,14 +128,70 @@ def process_ticket_ai(self, ticket_id):
         self.retry(exc=e, countdown=2 ** self.request.retries)
 
 
-def _get_agent_id(role):
+def _get_agent_by_queue_and_role(queue_id, role):
+    """
+    Fetch an agent based on queue, role, and today's roster shift timing.
+    
+    Logic:
+    1. Find the location linked to the given queue_id
+    2. Filter agents deployed on that location with matching role
+    3. Check their roster for TODAY (current week) and today's day status
+    4. Prefer agents currently on-shift (status='ON' and within start/end times)
+    5. Fallback to any matching agent if none are on-shift
+    6. Default to agent_id=1 if no agents found
+    
+    Args:
+        queue_id (int or str): The queue ID to search for
+        role (str): The role to match (case-insensitive)
+    
+    Returns:
+        int: agent_id if found, otherwise default agent id=1
+    """
+    if not role:
+        role = "Admin Otrs"
+    
     role = role.strip()
-    agent = Agent.objects.filter(role__icontains=role)
-    if agent.count() < 1:
-        return Agent.objects.filter(role__icontains="Manager").first().agent_id
-    if agent.count() == 1:
-        return agent.first().agent_id
-    return agent.order_by('?').first().agent_id  # Randomly select one agent if multiple match
+    
+    # Step 1: Find location(s) linked to this queue
+    locations = Location.objects.filter(queue=str(queue_id))
+    
+    if not locations.exists():
+        print(f"No location found for queue {queue_id}. Defaulting to agent_id=1.")
+        return 1
+    
+    # Step 2: Get agents deployed on those locations with matching role
+    agents = Agent.objects.filter(
+        location__in=locations,
+        role__icontains=role,
+        is_valid=True
+    )
+
+    if agents.count() < 1:
+        print(f"No agent found for queue {queue_id} with role '{role}'. Defaulting to agent_id=1.")
+        return 1
+    available_agent_ids = set()
+    today = datetime.now().strftime("%a").lower()
+    available_agents = Agent.objects.raw(f""" SELECT aa.agent_id FROM agents_agent aa 
+                               join agents_roster ar on ar.agent_id = aa.agent_id 
+                               WHERE {today}_status = 'ON' and {today}_end > ((now() AT TIME ZONE 'Asia/Kolkata')::time) 
+                               and {today}_start < (now() AT TIME ZONE 'Asia/Kolkata')::time;""")
+    for agent in available_agents:
+        available_agent_ids.add(agent.agent_id)
+
+    print(f"Available agents on shift today for role '{role}': {available_agent_ids}")
+    if available_agent_ids:
+        avail_qs = agents.filter(agent_id__in=available_agent_ids)
+        if avail_qs.count() == 0:
+            print(f"No agents on shift today for role '{role}'. Falling back to any matching agent.")
+            return 1
+        elif avail_qs.count() == 1:
+            return avail_qs.first().agent_id
+        return avail_qs.order_by('?').first().agent_id
+
+    # No agents available today per roster -> fallback to any matching agent
+    if agents.count() == 1:
+        return agents.first().agent_id
+    return agents.order_by('?').first().agent_id
 
 
 @shared_task

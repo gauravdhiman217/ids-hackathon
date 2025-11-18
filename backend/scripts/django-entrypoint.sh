@@ -29,10 +29,6 @@ echo "Database is ready!"
 
 if [ $# -eq 0 ]; then
     echo "No arguments provided, skipping command execution."
-
-
-
-
     echo "Running Migration"
     python manage.py migrate
 
