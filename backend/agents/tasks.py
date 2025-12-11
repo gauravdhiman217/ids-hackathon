@@ -39,8 +39,12 @@ def process_ticket_data(ticket_id):
             #     ticket_processor.update_ticket_log(ticket_obj.id, ticket)
             #     return {"ticket_id": ticket_id, "status": "updating existing ticket"}
             ticket_processor.store_ticket_log(ticket_id, ticket, entry_type="webhook")
-            job = group(process_ticket_embedding.s(ticket_id), process_ticket_ai.s(ticket_id))
-            job.apply_async()
+            
+
+            process_ticket_embedding.delay(ticket_id)
+            
+            # job = group(process_ticket_embedding.s(ticket_id), process_ticket_ai.s(ticket_id))
+            # job.apply_async()
         return {"ticket_id": ticket_id, "status": "processed"}
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
