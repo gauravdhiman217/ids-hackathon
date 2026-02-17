@@ -15,6 +15,7 @@ from typing_extensions import TypedDict
 
 from .context_evaluateor import evaluate_relevance
 from .model_hub import get_model
+from .monitoring import langfuse_handler
 from .retriever_factory import create_multi_query_retriever
 
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
@@ -210,7 +211,9 @@ class RAGPipeline:
         Returns:
             Dictionary containing answer_found flag and answer content.
         """
-        result = self.graph.invoke({"question": question})
+        result = self.graph.invoke(
+            {"question": question}, config={"callbacks": [langfuse_handler]}
+        )
         return {
             "answer_found": result.get("answer_found", False),
             "answer": result.get("answer"),
