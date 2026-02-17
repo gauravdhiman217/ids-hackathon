@@ -1,6 +1,7 @@
 from langchain_core.runnables import RunnableParallel
 from langsmith import traceable
-
+from ..monitoring import langfuse_handler
+from langfuse import observe
 from ..model_hub import get_model
 from .parsers.output_parsers import (get_output_fixing_parser,
                                      get_pydantic_parser,
@@ -10,6 +11,7 @@ from .prompts.ticket_prompt import (get_ticket_classification_prompt,
 
 
 @traceable
+@observe
 def run_ticket_classification(ticket: str):
     model = get_model()
 
@@ -37,7 +39,7 @@ def run_ticket_classification(ticket: str):
     classifications = RunnableParallel(
         classificationi3=prompt_and_model, classification_role=prompt_and_model_role
     )
-    opt = classifications.invoke({"ticket": ticket})
+    opt = classifications.invoke({"ticket": ticket}, config={"callbacks": [langfuse_handler]})
     predicted_service = opt.get(
         "classificationi3"
     ).services_probabilities.top_category()

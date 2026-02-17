@@ -6,7 +6,7 @@ contains relevant information to answer a given query.
 """
 
 from typing import Optional
-
+from .monitoring import langfuse_handler
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -80,7 +80,7 @@ Be strict in your evaluation. Only mark as relevant if the context can genuinely
             Classification object with is_relevant flag and reason.
         """
         return self.chain.invoke(
-            {"query": query, "retrieved_context": retrieved_context}
+            {"query": query, "retrieved_context": retrieved_context}, config={"callbacks": [langfuse_handler]}
         )
 
     async def aevaluate(self, query: str, retrieved_context: str) -> Classification:
@@ -95,7 +95,7 @@ Be strict in your evaluation. Only mark as relevant if the context can genuinely
             Classification object with is_relevant flag and reason.
         """
         return await self.chain.ainvoke(
-            {"query": query, "retrieved_context": retrieved_context}
+            {"query": query, "retrieved_context": retrieved_context}, config={"callbacks": [langfuse_handler]}
         )
 
 

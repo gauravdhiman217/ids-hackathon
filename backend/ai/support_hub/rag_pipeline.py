@@ -9,6 +9,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.vectorstores import VectorStore
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
+from langfuse import observe
 from langgraph.graph import START, StateGraph
 from pinecone import Pinecone
 from typing_extensions import TypedDict
@@ -106,6 +107,7 @@ class RAGPipeline:
         self.prompt = PromptTemplate.from_template(self.config.answer_template)
         self.graph = self._build_graph()
 
+    @observe
     def _create_default_vector_store(self) -> VectorStore:
         """Create default Pinecone vector store with HuggingFace embeddings."""
         load_dotenv()
@@ -124,6 +126,7 @@ class RAGPipeline:
 
         return PineconeVectorStore(index=index, embedding=embeddings)
 
+    @observe
     def _retrieve(self, state: RAGState) -> dict:
         """
         Retrieve relevant documents for the question.
@@ -135,9 +138,10 @@ class RAGPipeline:
             Dictionary with retrieved context documents.
         """
         retriever = create_multi_query_retriever(vector_store=self.vector_store)
-        retrieved_docs = retriever.invoke(state["question"])
+        retrieved_docs = retriever.invoke(state["question"], config={"callbacks": [langfuse_handler]})
         return {"context": retrieved_docs}
 
+    @observe
     def _generate(self, state: RAGState) -> dict:
         """
         Generate answer from retrieved context.
@@ -166,12 +170,13 @@ class RAGPipeline:
 
         # Generate answer
         messages = self.prompt.invoke(
-            {"question": state["question"], "context": docs_content}
+            {"question": state["question"], "context": docs_content}, config={"callbacks": [langfuse_handler]}
         )
-        response = self.llm.invoke(messages)
+        response = self.llm.invoke(messages, config={"callbacks": [langfuse_handler]})
 
         return {"answer_found": True, "answer": response.content}
 
+    @observe
     def _build_graph(self) -> StateGraph:
         """
         Build LangGraph pipeline.
@@ -200,7 +205,7 @@ class RAGPipeline:
     #         "answer_found": result.get("answer_found", False),
     #         "answer": result.get("answer"),
     #     }
-
+    @observe
     def invoke(self, question: str) -> dict:
         """
         Synchronously invoke RAG pipeline.
@@ -234,6 +239,7 @@ class RAGPipeline:
 
 
 # Factory function for easy instantiation
+@observe
 def create_rag_pipeline(
     ticket: str,
     vector_store: Optional[VectorStore] = None,
