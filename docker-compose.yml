@@ -1,7 +1,6 @@
 volumes:
   dbdata: {}
   frontend_dist: {}
-  langfuse_postgres_data: {}
   langfuse_clickhouse_data: {}
   langfuse_clickhouse_logs: {}
   langfuse_minio_data: {}
@@ -28,6 +27,12 @@ services:
       - "5432"
     volumes:
       - dbdata:/var/lib/postgresql/data:delegated
+      - ./docker/postgres/init-langfuse-db.sh:/docker-entrypoint-initdb.d/init-langfuse-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U project"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
   adminer:
     image: adminer
     restart: always
@@ -82,27 +87,13 @@ services:
   redis:
     image: "redis:alpine"
     ports: []
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 10s
+      retries: 10
 
   # ── Langfuse v3 Services ──────────────────────────────────────────
-
-  langfuse-postgres:
-    image: postgres:17
-    restart: always
-    environment:
-      POSTGRES_USER: langfuse
-      POSTGRES_PASSWORD: langfuse
-      POSTGRES_DB: langfuse
-      TZ: UTC
-      PGTZ: UTC
-    volumes:
-      - langfuse_postgres_data:/var/lib/postgresql/data
-    ports:
-      - "127.0.0.1:15432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U langfuse"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
 
   langfuse-clickhouse:
     image: clickhouse/clickhouse-server
@@ -124,20 +115,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 1s
-
-  langfuse-redis:
-    image: redis:7
-    restart: always
-    command: >-
-      --requirepass langfuseredissecret
-      --maxmemory-policy noeviction
-    ports:
-      - "127.0.0.1:16379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "langfuseredissecret", "ping"]
-      interval: 3s
-      timeout: 10s
-      retries: 10
 
   langfuse-minio:
     image: cgr.dev/chainguard/minio
@@ -163,11 +140,11 @@ services:
     image: langfuse/langfuse-worker:3
     restart: always
     depends_on:
-      langfuse-postgres:
+      db:
         condition: service_healthy
       langfuse-clickhouse:
         condition: service_healthy
-      langfuse-redis:
+      redis:
         condition: service_healthy
       langfuse-minio:
         condition: service_healthy
@@ -180,11 +157,11 @@ services:
     image: langfuse/langfuse:3
     restart: always
     depends_on:
-      langfuse-postgres:
+      db:
         condition: service_healthy
       langfuse-clickhouse:
         condition: service_healthy
-      langfuse-redis:
+      redis:
         condition: service_healthy
       langfuse-minio:
         condition: service_healthy

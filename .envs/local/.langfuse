@@ -10,8 +10,8 @@ ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
 TELEMETRY_ENABLED=true
 LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=false
 
-# Database (langfuse-postgres)
-DATABASE_URL=postgresql://langfuse:langfuse@langfuse-postgres:5432/langfuse
+# Database (shared with project — db service)
+DATABASE_URL=postgresql://project:password@db:5432/langfuse
 
 # ClickHouse (langfuse-clickhouse)
 CLICKHOUSE_MIGRATION_URL=clickhouse://langfuse-clickhouse:9000
@@ -20,10 +20,10 @@ CLICKHOUSE_USER=clickhouse
 CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 
-# Redis (langfuse-redis)
-REDIS_HOST=langfuse-redis
+# Redis (shared with project — redis service)
+REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_AUTH=langfuseredissecret
+REDIS_AUTH=
 REDIS_TLS_ENABLED=false
 
 # S3 / MinIO (langfuse-minio)
