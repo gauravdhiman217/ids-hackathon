@@ -1,4 +1,5 @@
 import aiohttp
+from langfuse import observe
 
 
 class RoleFetcher:
@@ -15,6 +16,7 @@ class RoleFetcher:
         """
         self.base_url = base_url
 
+    @observe
     async def fetch_roles(self):
         """
         Asynchronously fetch roles from the API endpoint.
@@ -35,6 +37,7 @@ class RoleFetcher:
                 else:
                     raise Exception(f"Failed to fetch data: HTTP {response.status}")
 
+    @observe
     async def list_roles(self):
         """
         Asynchronously list roles from the API.

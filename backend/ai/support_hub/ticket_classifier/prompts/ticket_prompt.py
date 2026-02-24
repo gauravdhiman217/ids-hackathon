@@ -1,8 +1,9 @@
 from langchain_core.prompts import PromptTemplate
 from langsmith import traceable
-
+from langfuse import observe
 
 @traceable
+@observe
 def get_ticket_classification_prompt(format_instructions: str) -> PromptTemplate:
     template = """
 You are an IT support ticket classifier.
@@ -35,6 +36,7 @@ Ticket:
 
 
 @traceable
+@observe
 def get_ticket_classification_prompt_roles(format_instructions: str) -> PromptTemplate:
     template = """
 You are an IT support ticket classifier.

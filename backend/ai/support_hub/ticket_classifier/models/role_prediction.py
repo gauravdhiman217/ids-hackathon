@@ -1,10 +1,12 @@
 from enum import Enum
 
+from langfuse import observe
 from pydantic import BaseModel, Field
 
 from .utils import RoleFetcher
 
 
+@observe
 async def get_roles():
     fetcher = RoleFetcher()
     try:
